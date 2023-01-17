@@ -1,5 +1,5 @@
-import { Status } from "src/helpers/enums";
-import { Dietries } from "src/modules/Dietries";
+import { Status } from "../helpers/enums";
+import { Dietries } from "../modules/Dietries";
 
 const createDietry = async (req: any, res: any, next: any) => {
     try {

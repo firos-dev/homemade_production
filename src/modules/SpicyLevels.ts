@@ -1,4 +1,4 @@
-import { Status } from "src/helpers/enums";
+import { Status } from "../helpers/enums";
 import {
   BaseEntity,
   Entity,
@@ -28,9 +28,10 @@ export class SpicyLevels extends BaseEntity {
   image: string;
 
   @Column({
-    type: 'enum',
+    type: "enum",
+    enum: Status,
   })
-  status: Status
+  status: Status;
 
   @CreateDateColumn()
   created_at: Date;

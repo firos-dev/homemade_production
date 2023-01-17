@@ -1,5 +1,5 @@
 import express from "express";
-import spicy_levelsController from "src/controllers/spicy_levels-controller";
+import spicy_levelsController from "../controllers/spicy_levels-controller";
 import auth from "../middleware/auth";
 const router = express.Router();
 

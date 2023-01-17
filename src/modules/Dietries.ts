@@ -1,4 +1,4 @@
-import { Status } from "src/helpers/enums";
+import { Status } from "../helpers/enums";
 import {
   BaseEntity,
   Entity,
@@ -26,6 +26,7 @@ export class Dietries extends BaseEntity {
 
   @Column({
     type: "enum",
+    enum: Status,
   })
   status: Status;
 

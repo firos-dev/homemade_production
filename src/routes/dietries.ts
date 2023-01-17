@@ -1,5 +1,5 @@
 import express from "express";
-import dietriesController from "src/controllers/dietries-controller";
+import dietriesController from "../controllers/dietries-controller";
 import auth from "../middleware/auth";
 const router = express.Router();
 

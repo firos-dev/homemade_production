@@ -1,6 +1,4 @@
-import { Status } from "src/helpers/enums";
-import { DeliveryPartners } from "src/modules/DeliveryPartners";
-import { Dietries } from "src/modules/Dietries";
+import { DeliveryPartners } from "../modules/DeliveryPartners";
 
 const createDeliveryPartner = async (req: any, res: any, next: any) => {
     try {

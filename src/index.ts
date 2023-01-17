@@ -1,6 +1,6 @@
 import { Customers } from "./modules/Customers";
-import { DeliveryPartners } from "src/modules/DeliveryPartners";
-import { Dietries } from "src/modules/Dietries";
+import { DeliveryPartners } from "./modules/DeliveryPartners";
+import { Dietries } from "./modules/Dietries";
 import express, { NextFunction, Request, Response } from "express";
 import { DataSource } from "typeorm";
 import { Users } from "./modules/User";

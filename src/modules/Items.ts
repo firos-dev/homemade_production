@@ -1,4 +1,4 @@
-import { Status } from "src/helpers/enums";
+import { Status } from "../helpers/enums";
 import {
   BaseEntity,
   Entity,

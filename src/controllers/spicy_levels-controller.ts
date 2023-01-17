@@ -1,4 +1,4 @@
-import { Status } from "src/helpers/enums";
+import { Status } from "../helpers/enums";
 import { SpicyLevels } from "./../modules/SpicyLevels";
 const createSpicyLevel = async (req: any, res: any, next: any) => {
   try {
