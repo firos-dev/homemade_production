@@ -1,0 +1,88 @@
+import { Customers } from "./modules/Customers";
+import { DeliveryPartners } from "src/modules/DeliveryPartners";
+import { Dietries } from "src/modules/Dietries";
+import express, { NextFunction, Request, Response } from "express";
+import { DataSource } from "typeorm";
+import { Users } from "./modules/User";
+import { userRouter } from "./routes/user";
+import { cuisineRouter } from "./routes/cuisines";
+import { Cuisines } from "./modules/Cuisines";
+import fs from "fs";
+import { OtpMaster } from "./modules/OtpMaster";
+import { roleRouter } from "./routes/roles";
+import { Roles } from "./modules/Roles";
+import { itemRouter } from "./routes/items";
+import { spicyLevelRouter } from "./routes/spicy_levels";
+import { dietriesRouter } from "./routes/dietries";
+import { customerRouter } from "./routes/customers";
+import { deliveryPartnersRouter } from "./routes/delivery_partners";
+import { SpicyLevels } from "./modules/SpicyLevels";
+
+require("dotenv").config();
+const app = express();
+
+(() => {
+  let portEnv = process.env.DB_PORT || 5432;
+  let dbPort: number = +portEnv;
+
+  const AppDataSource = new DataSource({
+    type: "postgres",
+    host: process.env.DB_HOST,
+    port: dbPort,
+    username: process.env.DB_USERNAME,
+    password: process.env.PASSWORD,
+    database: process.env.DATABASE,
+    entities: [
+      Users,
+      Cuisines,
+      OtpMaster,
+      Roles,
+      Dietries,
+      DeliveryPartners,
+      SpicyLevels,
+      Customers,
+    ],
+    synchronize: true,
+  });
+
+  AppDataSource.initialize()
+    .then(() => {
+      console.log("Data Source has been initialized!");
+    })
+    .catch((err) => {
+      console.error("Error during Data Source initialization", err);
+    });
+
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
+
+  /**
+   * ROUTES
+   */
+  app.use(userRouter);
+  app.use(cuisineRouter);
+  app.use(roleRouter);
+  app.use(itemRouter);
+  app.use(spicyLevelRouter);
+  app.use(dietriesRouter);
+  app.use(customerRouter);
+  app.use(deliveryPartnersRouter);
+  app.use((error: any, req: any, res: any, next: any) => {
+    if (req.file) {
+      fs.unlink(req.file.path, (err) => {
+        console.log(err);
+      });
+    }
+    if (res.headerSent) {
+      return next(error);
+    }
+    res.status(error.statusCode || 500);
+    res.json({ message: error.message || "An unknown error occurred!" });
+  });
+
+  const port = process.env.PORT;
+
+  app.listen(port, () => {
+    console.log(`App running on port ${port}`);
+  });
+})();
