@@ -1,3 +1,4 @@
+import { Chefs } from "./modules/Chefs";
 import { Customers } from "./modules/Customers";
 import { DeliveryPartners } from "./modules/DeliveryPartners";
 import { Dietries } from "./modules/Dietries";
@@ -17,34 +18,34 @@ import { dietriesRouter } from "./routes/dietries";
 import { customerRouter } from "./routes/customers";
 import { deliveryPartnersRouter } from "./routes/delivery_partners";
 import { SpicyLevels } from "./modules/SpicyLevels";
+import { chefsRouter } from "./routes/chefs";
 
 require("dotenv").config();
 const app = express();
+let portEnv = process.env.DB_PORT || 5432;
+let dbPort: number = +portEnv;
+export const AppDataSource = new DataSource({
+  type: "postgres",
+  host: process.env.DB_HOST,
+  port: dbPort,
+  username: process.env.DB_USERNAME,
+  password: process.env.PASSWORD,
+  database: process.env.DATABASE,
+  entities: [
+    Users,
+    Cuisines,
+    OtpMaster,
+    Roles,
+    Dietries,
+    DeliveryPartners,
+    SpicyLevels,
+    Customers,
+    Chefs,
+  ],
+  synchronize: true,
+});
 
 (() => {
-  let portEnv = process.env.DB_PORT || 5432;
-  let dbPort: number = +portEnv;
-
-  const AppDataSource = new DataSource({
-    type: "postgres",
-    host: process.env.DB_HOST,
-    port: dbPort,
-    username: process.env.DB_USERNAME,
-    password: process.env.PASSWORD,
-    database: process.env.DATABASE,
-    entities: [
-      Users,
-      Cuisines,
-      OtpMaster,
-      Roles,
-      Dietries,
-      DeliveryPartners,
-      SpicyLevels,
-      Customers,
-    ],
-    synchronize: true,
-  });
-
   AppDataSource.initialize()
     .then(() => {
       console.log("Data Source has been initialized!");
@@ -67,6 +68,7 @@ const app = express();
   app.use(dietriesRouter);
   app.use(customerRouter);
   app.use(deliveryPartnersRouter);
+  app.use(chefsRouter);
   app.use((error: any, req: any, res: any, next: any) => {
     if (req.file) {
       fs.unlink(req.file.path, (err) => {

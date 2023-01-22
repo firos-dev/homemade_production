@@ -38,6 +38,7 @@ export class Users extends BaseEntity {
   customer: Customers;
 
   @Column({
+    nullable: true,
     name: "customer_id",
   })
   customer_id: string;
@@ -58,17 +59,24 @@ export class Users extends BaseEntity {
   full_name: string;
 
   @Column({
+    nullable: true,
     unique: true,
   })
   username: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   email: string;
 
-  @Column()
+  @Column({
+    unique: true,
+  })
   mobile: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   password: string;
 
   @Column({
@@ -84,11 +92,15 @@ export class Users extends BaseEntity {
 
   @BeforeInsert()
   async hashPassword() {
-    this.password = await bcrypt.hash(this.password, 10);
+    if (this.password) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
   }
 
   @BeforeUpdate()
   async hashPasswordOnUpdate() {
-    this.password = await bcrypt.hash(this.password, 10);
+    if (this.password) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
   }
 }

@@ -1,7 +1,8 @@
+import { AppDataSource } from "./../index";
 import bcrypt from "bcrypt";
 import { Users } from "../modules/User";
 import jwt from "jsonwebtoken";
-import { DataSource } from "typeorm";
+import { DataSource, getConnection, getRepository } from "typeorm";
 import { OtpMaster } from "../modules/OtpMaster";
 import { Status } from "../helpers/enums";
 
@@ -42,18 +43,21 @@ export const findUserByMobile = async (mobile: string) => {
 };
 
 export const validateOtp = async (user_id: string, otp: string) => {
-  const isValid = await OtpMaster.findOne({
-    relations: ["user"],
-    where: { user_id, status: Status.ACTIVE, otp_code: otp },
-  });
-  
+  const isValid = await AppDataSource.getRepository(OtpMaster)
+    .createQueryBuilder("otp_master")
+    .leftJoinAndSelect("otp_master.user", "user")
+    .where("otp_master.user.id = :id", { id: user_id })
+    .andWhere("otp_master.status = :status", { status: "Active" })
+    .andWhere("otp_master.otp_code = :otp", { otp })
+    .getOne();
+
   if (!isValid) {
     throw Error("Invalid otp");
   }
-  
-  let user = isValid.user 
 
-  await OtpMaster.update({ id: user.id }, {status: Status.ACTIVE});
+  let user = isValid.user;
+
+  await OtpMaster.update({ user_id: user.id }, { status: Status.EXPIRED });
 
   return user;
 };

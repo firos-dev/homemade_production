@@ -20,7 +20,8 @@ router.post("/api/register", async (req, res) => {
       password,
       confirm_password,
     } = req.body;
-    if (password !== confirm_password) {
+
+    if (password && password !== confirm_password) {
       throw new Error("Password missmatch");
     }
     const user: any = Users.create({
@@ -33,19 +34,32 @@ router.post("/api/register", async (req, res) => {
       password,
     });
 
-    await user.save();
-    res.status(201).json({
-      status: 0,
-      message: "User has been successfully registered",
-      data: {
-        name: user.name,
-        username: user.name,
-        mobile: user.mobile,
-        email: user.email,
-      },
+    await user.save().then(async() => {
+      await findUserByMobile(mobile).then(async (data: any) => {
+        let user = data.user;
+        res.status(200).json({
+          status: 0,
+          message: "User has been successfully registered",
+          data: {
+            user_id: user.id,
+            otp: data.otp,
+            name: user.name,
+            username: user.name,
+            mobile: user.mobile,
+            email: user.email,
+          },
+        });
+      });
     });
+
   } catch (error) {
-    console.log(error);
+    if (error.message.includes("duplicate key")) {
+      res.status(400).json({
+        status: 1,
+        message: "This mobile number is already registered.",
+      });
+      return;
+    }
     res.status(400).json({
       status: 1,
       message: error.message,
@@ -79,7 +93,6 @@ router.post("/api/login", async (req, res) => {
         throw new Error(e);
       });
   } catch (error) {
-    console.log(error);
     res.status(400).json({
       status: 1,
       message: error.message,
@@ -148,7 +161,6 @@ router.post("/api/resend/otp", async (req, res) => {
       });
     }
     await generateOTP(user).then((data: any) => {
-      
       res.status(200).json({
         status: 0,
         data: {

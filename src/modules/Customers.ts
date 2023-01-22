@@ -23,6 +23,12 @@ export class Customers extends BaseEntity {
   @Column()
   user_id: String;
 
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  image: String;
+
   @Column()
   name: string;
 
