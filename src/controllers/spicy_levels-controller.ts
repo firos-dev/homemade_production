@@ -18,9 +18,26 @@ const createSpicyLevel = async (req: any, res: any, next: any) => {
 };
 
 const getSpicyLevels = async (req: any, res: any, next: any) => {
+  const page = req.query.page || null;
+
+  const perPage = req.query.perPage || null;
+
+  const offset = {
+    skip: Number(page) * Number(perPage),
+    take: Number(perPage),
+  };
+
+  let body = req.query;
+
+  if (body.page || body.perPage) {
+    delete body.page;
+    delete body.perPage;
+  }
   try {
     const spicyLevels = await SpicyLevels.find({
-      where: { status: Status.ACTIVE },
+      where: body,
+      ...offset,
+      order: { created_at: "DESC" },
     });
     res.status(200).json({
       status: 0,

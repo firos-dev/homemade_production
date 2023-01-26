@@ -1,12 +1,12 @@
 import { Customers } from "./../modules/Customers";
 const createCustomer = async (req: any, res: any, next: any) => {
   try {
-    const customers = Customers.create(req.body);
-    await customers.save();
+    const customer = Customers.create(req.body);
+    await customer.save();
     res.status(201).json({
       status: 0,
       message: "Record has been successfully saved",
-      data: customers,
+      data: customer,
     });
   } catch (error) {
     res.status(400).json({
@@ -17,8 +17,28 @@ const createCustomer = async (req: any, res: any, next: any) => {
 };
 
 const getCustomers = async (req: any, res: any, next: any) => {
+  const page = req.query.page || null;
+
+    const perPage = req.query.perPage || null;
+
+    const offset = {
+      skip: Number(page) * Number(perPage),
+      take: Number(perPage),
+    };
+
+    let body = req.query;
+
+    if (body.page || body.perPage) {
+      delete body.page;
+      delete body.perPage;
+    }
   try {
-    const customers = await Customers.find();
+    const customers = await Customers.find({
+      where: body,
+      ...offset,
+      relations: ["user"],
+      order: {created_at: "DESC"}
+    });
     res.status(200).json({
       status: 0,
       data: customers,

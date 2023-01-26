@@ -29,9 +29,6 @@ export class Customers extends BaseEntity {
   })
   image: String;
 
-  @Column()
-  name: string;
-
   @CreateDateColumn()
   created_at: Date;
 

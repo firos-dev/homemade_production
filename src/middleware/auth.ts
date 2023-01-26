@@ -17,7 +17,7 @@ const auth = async (req: any, res: any, next: any) => {
   delete user?.password;
 
   if (!user) {
-    res.status(401).json({
+    return res.status(401).json({
       status: 1,
       message: "Not authenticated",
     });

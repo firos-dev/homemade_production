@@ -33,6 +33,7 @@ export const findUserByMobile = async (mobile: string) => {
     await Users.findOne({ where: { mobile } }).then(async (user: any) => {
       if (!user) {
         reject("Unable to login ");
+        return;
       }
 
       const otp: any = await generateOTP(user);
@@ -46,10 +47,11 @@ export const validateOtp = async (user_id: string, otp: string) => {
   const isValid = await AppDataSource.getRepository(OtpMaster)
     .createQueryBuilder("otp_master")
     .leftJoinAndSelect("otp_master.user", "user")
-    .where("otp_master.user.id = :id", { id: user_id })
+    .where("user_id = :id", { id: user_id })
     .andWhere("otp_master.status = :status", { status: "Active" })
     .andWhere("otp_master.otp_code = :otp", { otp })
     .getOne();
+  console.log(isValid);
 
   if (!isValid) {
     throw Error("Invalid otp");
@@ -63,6 +65,8 @@ export const validateOtp = async (user_id: string, otp: string) => {
 };
 
 export const generateOTP = async (user: any) => {
+  console.log(user);
+
   var digits = "123456789";
 
   var otpLength = 4;

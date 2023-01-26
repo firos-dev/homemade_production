@@ -24,6 +24,25 @@ router.post("/api/register", async (req, res) => {
     if (password && password !== confirm_password) {
       throw new Error("Password missmatch");
     }
+    let registeredUser : any = await findUserByMobile(mobile)
+    
+    
+    if(registeredUser.user?.id){
+      return res.status(200).json({
+        status: 0,
+        message: "Mobile number already registered,",
+        data: {
+          user_id: registeredUser.user.id,
+          otp: registeredUser.otp,
+          name: registeredUser.user.name,
+          username: registeredUser.user.name,
+          mobile: registeredUser.user.mobile,
+          email: registeredUser.user.email,
+        },
+      });
+    }
+    
+
     const user: any = Users.create({
       first_name,
       last_name,
@@ -34,10 +53,10 @@ router.post("/api/register", async (req, res) => {
       password,
     });
 
-    await user.save().then(async() => {
+    return await user.save().then(async () => {
       await findUserByMobile(mobile).then(async (data: any) => {
         let user = data.user;
-        res.status(200).json({
+        return res.status(200).json({
           status: 0,
           message: "User has been successfully registered",
           data: {
@@ -51,16 +70,16 @@ router.post("/api/register", async (req, res) => {
         });
       });
     });
-
   } catch (error) {
+    console.log(error);
+    
     if (error.message.includes("duplicate key")) {
-      res.status(400).json({
+      return res.status(400).json({
         status: 1,
         message: "This mobile number is already registered.",
       });
-      return;
     }
-    res.status(400).json({
+    return res.status(400).json({
       status: 1,
       message: error.message,
     });
@@ -103,16 +122,20 @@ router.post("/api/login", async (req, res) => {
 router.post("/api/mobile/login", async (req, res) => {
   try {
     const { mobile } = req.body;
-    await findUserByMobile(mobile).then(async (data: any) => {
-      let user = data.user;
-      res.status(200).json({
-        status: 0,
-        data: {
-          user_id: user.id,
-          otp: data.otp,
-        },
+    await findUserByMobile(mobile)
+      .then(async (data: any) => {
+        let user = data.user;
+        res.status(200).json({
+          status: 0,
+          data: {
+            user_id: user.id,
+            otp: data.otp,
+          },
+        });
+      })
+      .catch((e) => {
+        throw new Error(e);
       });
-    });
   } catch (error) {
     console.log(error);
     res.status(400).json({
