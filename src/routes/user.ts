@@ -24,10 +24,16 @@ router.post("/api/register", async (req, res) => {
     if (password && password !== confirm_password) {
       throw new Error("Password missmatch");
     }
-    let registeredUser : any = await findUserByMobile(mobile)
+    let registeredUser : any;
+    let error :any;
+    await findUserByMobile(mobile).then((result) => {
+      registeredUser = result
+    }).catch((err) => {
+      error= err
+    })
     
     
-    if(registeredUser.user?.id){
+    if(!error){
       return res.status(200).json({
         status: 0,
         message: "Mobile number already registered,",
@@ -42,7 +48,6 @@ router.post("/api/register", async (req, res) => {
       });
     }
     
-
     const user: any = Users.create({
       first_name,
       last_name,
@@ -72,13 +77,6 @@ router.post("/api/register", async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    
-    if (error.message.includes("duplicate key")) {
-      return res.status(400).json({
-        status: 1,
-        message: "This mobile number is already registered.",
-      });
-    }
     return res.status(400).json({
       status: 1,
       message: error.message,
