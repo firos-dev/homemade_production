@@ -42,7 +42,7 @@ const createChef = async (req: any, res: any, next: any) => {
     "terms_accepted",
     "drop_off_point_id",
     "certificate_file",
-    "certificate_number"
+    "certificate_number",
   ];
   let locationUpdate = [
     "address_line_one",
@@ -69,9 +69,9 @@ const createChef = async (req: any, res: any, next: any) => {
         { first_name, middle_name, last_name, full_name }
       );
     }
-
+    let chef;
     if (chefValues.length) {
-      const chef = Chefs.create({
+      chef = Chefs.create({
         user_id,
         bio,
         image,
@@ -82,7 +82,7 @@ const createChef = async (req: any, res: any, next: any) => {
         terms_accepted,
         drop_off_point_id,
         certificate_file,
-        certificate_number
+        certificate_number,
       });
       await chef.save();
     }
@@ -107,6 +107,7 @@ const createChef = async (req: any, res: any, next: any) => {
     res.status(201).json({
       status: 0,
       message: "Record has been successfully saved",
+      chef,
     });
   } catch (error) {
     console.error(error);
