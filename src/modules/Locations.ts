@@ -1,3 +1,4 @@
+import { AddressType } from "./../helpers/enums";
 import { Status } from "../helpers/enums";
 import {
   Entity,
@@ -10,56 +11,76 @@ import {
   JoinColumn,
 } from "typeorm";
 import { Users } from "./User";
-
 @Entity("locations")
 export class Locations extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
-  name: string;
-
-  @ManyToOne(() => Users)
+  @ManyToOne(() => Users, (user) => user.locations)
   @JoinColumn({ name: "user_id" })
   user: Users;
-
   @Column({
+    nullable: true,
     name: "user_id",
   })
   user_id: string;
 
   @Column({
-    type: 'text'
+    nullable: true,
+    type: "text",
   })
-  address: string;
+  address_line_one: string;
 
   @Column({
-    type: 'text'
+    nullable: true,
+    type: "text",
   })
-  second_address: string;
+  address_line_two: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   latitude: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   longitude: string;
-  
-  @Column()
-  country: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
+  area: string;
+
+  @Column({
+    nullable: true,
+  })
   state: string;
 
-  @Column()
-  suburb: string;
+  @Column({
+    nullable: true,
+  })
+  city: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   zip_code: string;
-  
+
+  @Column({
+    nullable: true,
+  })
+  country: string;
+
+  @Column({
+    type: "enum",
+    enum: AddressType,
+  })
+  address_type: AddressType;
+
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
-
 }

@@ -1,15 +1,115 @@
+import { AddressType } from "../helpers/enums";
+import { Locations } from "../modules/Locations";
+import { Users } from "../modules/User";
 import { Chefs } from "./../modules/Chefs";
 
 const createChef = async (req: any, res: any, next: any) => {
+  const {
+    user_id,
+    first_name,
+    middle_name,
+    last_name,
+    full_name,
+    bio,
+    image,
+    cuisine_id,
+    dietry_id,
+    spicy_level_id,
+    description,
+    terms_accepted,
+    drop_off_point_id,
+    certificate_file,
+    certificate_number,
+    address_line_one,
+    address_line_two,
+    latitude,
+    longitude,
+    area,
+    state,
+    city,
+    zip_code,
+    country,
+  } = req.body;
+
+  let userUpdate = ["first_name", "middle_name", "last_name", "full_name"];
+  let chefCreate = [
+    "bio",
+    "image",
+    "cuisine_id",
+    "dietry_id",
+    "spicy_level_id",
+    "description",
+    "terms_accepted",
+    "drop_off_point_id",
+    "certificate_file",
+    "certificate_number"
+  ];
+  let locationUpdate = [
+    "address_line_one",
+    "address_line_two",
+    "latitude",
+    "longitude",
+    "area",
+    "state",
+    "city",
+    "zip_code",
+    "country",
+    "address_type",
+  ];
+  const keys = Object.keys(req.body);
+
   try {
-    const chef = Chefs.create(req.body);
-    await chef.save();
+    let userValues = keys.filter((value) => userUpdate.includes(value));
+    let chefValues = keys.filter((value) => chefCreate.includes(value));
+    let locationValues = keys.filter((value) => locationUpdate.includes(value));
+
+    if (userValues.length) {
+      await Users.update(
+        { id: user_id },
+        { first_name, middle_name, last_name, full_name }
+      );
+    }
+
+    if (chefValues.length) {
+      const chef = Chefs.create({
+        user_id,
+        bio,
+        image,
+        cuisine_id,
+        dietry_id,
+        spicy_level_id,
+        description,
+        terms_accepted,
+        drop_off_point_id,
+        certificate_file,
+        certificate_number
+      });
+      await chef.save();
+    }
+    if (locationValues.length) {
+      const location = Locations.create({
+        user_id,
+        address_line_one,
+        address_line_two,
+        latitude,
+        longitude,
+        area,
+        state,
+        city,
+        zip_code,
+        country,
+        address_type: AddressType.SERVICE_ADDRES,
+      });
+
+      await location.save();
+    }
+
     res.status(201).json({
       status: 0,
       message: "Record has been successfully saved",
-      data: chef,
     });
   } catch (error) {
+    console.error(error);
     res.status(400).json({
       status: 0,
       message: error.message,
@@ -37,7 +137,7 @@ const getChefs = async (req: any, res: any, next: any) => {
     const chefs = await Chefs.find({
       where: body,
       ...offset,
-      relations: ["user", "cuisine", "spicy_level", "dietry"],
+      relations: ["user", "cuisine", "spicy_level", "dietry", "user.locations"],
       order: { created_at: "DESC" },
     });
     res.status(200).json({

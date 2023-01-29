@@ -10,10 +10,13 @@ import {
   ManyToOne,
   JoinColumn,
   OneToOne,
+  OneToMany,
 } from "typeorm";
 import bcrypt from "bcrypt";
 import { Roles } from "./Roles";
 import { Customers } from "./Customers";
+import { Chefs } from "./Chefs";
+import { Locations } from "./Locations";
 @Entity("users")
 export class Users extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -43,10 +46,30 @@ export class Users extends BaseEntity {
   })
   customer_id: string;
 
+  @OneToOne(() => Chefs, (chef) => chef.user)
+  @JoinColumn({
+    name: "chef_id",
+  })
+  chef: Chefs;
+
+  @Column({
+    nullable: true,
+    name: "chef_id",
+  })
+  chef_id: string;
+
+  @OneToMany(() => Locations, (location) => location.user)
+  locations: Locations[];
+
   @Column({
     nullable: true,
   })
   first_name: string;
+
+  @Column({
+    nullable: true,
+  })
+  middle_name: string;
 
   @Column({
     nullable: true,

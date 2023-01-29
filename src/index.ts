@@ -1,3 +1,4 @@
+import { Availabilities } from "./modules/Availabilities";
 import { Chefs } from "./modules/Chefs";
 import { Customers } from "./modules/Customers";
 import { DeliveryPartners } from "./modules/DeliveryPartners";
@@ -19,6 +20,9 @@ import { customerRouter } from "./routes/customers";
 import { deliveryPartnersRouter } from "./routes/delivery_partners";
 import { SpicyLevels } from "./modules/SpicyLevels";
 import { chefsRouter } from "./routes/chefs";
+import { Locations } from "./modules/Locations";
+import { locationsRouter } from "./routes/locations";
+import { availabilitiesRouter } from "./routes/availabilities";
 
 require("dotenv").config();
 const app = express();
@@ -41,6 +45,8 @@ export const AppDataSource = new DataSource({
     SpicyLevels,
     Customers,
     Chefs,
+    Locations,
+    Availabilities,
   ],
   synchronize: true,
 });
@@ -69,6 +75,8 @@ export const AppDataSource = new DataSource({
   app.use(customerRouter);
   app.use(deliveryPartnersRouter);
   app.use(chefsRouter);
+  app.use(locationsRouter);
+  app.use(availabilitiesRouter);
   app.use((error: any, req: any, res: any, next: any) => {
     if (req.file) {
       fs.unlink(req.file.path, (err) => {
