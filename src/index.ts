@@ -13,7 +13,6 @@ import fs from "fs";
 import { OtpMaster } from "./modules/OtpMaster";
 import { roleRouter } from "./routes/roles";
 import { Roles } from "./modules/Roles";
-import { itemRouter } from "./routes/items";
 import { spicyLevelRouter } from "./routes/spicy_levels";
 import { dietriesRouter } from "./routes/dietries";
 import { customerRouter } from "./routes/customers";
@@ -23,6 +22,8 @@ import { chefsRouter } from "./routes/chefs";
 import { Locations } from "./modules/Locations";
 import { locationsRouter } from "./routes/locations";
 import { availabilitiesRouter } from "./routes/availabilities";
+import { Items } from "./modules/Items";
+import { itemsRouter } from "./routes/items";
 
 require("dotenv").config();
 const app = express();
@@ -47,6 +48,7 @@ export const AppDataSource = new DataSource({
     Chefs,
     Locations,
     Availabilities,
+    Items
   ],
   synchronize: true,
 });
@@ -69,7 +71,7 @@ export const AppDataSource = new DataSource({
   app.use(userRouter);
   app.use(cuisineRouter);
   app.use(roleRouter);
-  app.use(itemRouter);
+  app.use(itemsRouter);
   app.use(spicyLevelRouter);
   app.use(dietriesRouter);
   app.use(customerRouter);

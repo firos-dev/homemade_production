@@ -157,8 +157,54 @@ const getChefs = async (req: any, res: any, next: any) => {
 
 const updateChef = async (req: any, res: any, next: any) => {
   const { id } = req.params;
+  const {
+    first_name,
+    middle_name,
+    last_name,
+    full_name,
+    bio,
+    image,
+    email,
+    mobile,
+    drop_off_point,
+    certificate_number,
+    certificate_file,
+  } = req.body;
+
+  let userUpdate = [
+    "first_name",
+    "middle_name",
+    "last_name",
+    "full_name",
+    "email",
+    "mobile",
+    "certificate_number",
+    "certificate_file",
+  ];
+
+  let chefUpdate = ["bio", "image", "drop_off_point"];
+
+  const keys = Object.keys(req.body);
+
   try {
-    const chef = await Chefs.update({ id }, { ...req.body });
+    let chef: any = await Chefs.findOne({ where: { id } });
+
+    let userValues = keys.filter((value) => userUpdate.includes(value));
+    let chefValues = keys.filter((value) => chefUpdate.includes(value));
+
+    if (userValues) {
+      await Users.update(
+        { id: chef.user_id },
+        { first_name, middle_name, last_name, full_name, email, mobile }
+      );
+    }
+    if (chefValues) {
+      await Chefs.update(
+        { id },
+        { bio, image, certificate_number, certificate_file, drop_off_point }
+      );
+    }
+
     res.status(201).json({
       status: 0,
       message: "Record has been successfully updated",

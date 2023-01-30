@@ -5,4 +5,5 @@ const router = express.Router();
 
 router.post("/api/item", auth, itemsController.createItem);
 router.get("/api/items", auth, itemsController.getItems);
-export { router as itemRouter };
+router.patch("/api/item/:id", auth, itemsController.updateItem);
+export { router as itemsRouter };

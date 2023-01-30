@@ -43,6 +43,25 @@ const createLocation = async (req: any, res: any, next: any) => {
   }
 };
 
+const updateLocaion = async (req: any, res: any, next: any) => {
+  const { id } = req.params;
+  try {
+    if (!Object.keys(req.body).length) {
+      throw new Error("No updates found");
+    }
+    await Locations.update({ id }, { ...req.body });
+    res.status(201).json({
+      status: 0,
+      message: "Record has been successfully updated",
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: 1,
+      message: error.message,
+    });
+  }
+};
+
 const getLocations = async (req: any, res: any, next: any) => {
   const page = req.query.page || null;
 
@@ -160,6 +179,7 @@ const getDropOffPoints = async (req: any, res: any, next: any) => {
 };
 
 export default {
+  updateLocaion,
   createLocation,
   getLocations,
   createDropOffPoint,

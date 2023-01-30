@@ -6,26 +6,49 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from "typeorm";
+
+import { Chefs } from "./Chefs";
 
 @Entity("items")
 export class Items extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   name: string;
 
+  @ManyToOne(() => Chefs)
+  @JoinColumn({
+    name: "chef_id",
+  })
+  chef: Chefs;
+
   @Column()
+  chef_id: string;
+
+  @Column({
+    nullable: true,
+  })
   unit: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   portion_size: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   price: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   image: string;
 
   @Column({
@@ -34,21 +57,29 @@ export class Items extends BaseEntity {
   })
   available: boolean;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   description: string;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   ingredients: string;
 
   @Column({
-    nullable: true
+    nullable: true,
+  })
+  allergic_ingredients: string;
+
+  @Column({
+    nullable: true,
   })
   type: string;
 
   @Column({
     type: "enum",
+    enum: Status,
   })
   status: Status;
 

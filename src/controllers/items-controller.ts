@@ -1,9 +1,38 @@
-import { Status } from "../helpers/enums";
 import { Items } from "../modules/Items";
 
 const createItem = async (req: any, res: any, next: any) => {
+  const {
+    chef_id,
+    name,
+    unit,
+    portion_size,
+    price,
+    image,
+    available,
+    description,
+    ingredients,
+    allergic_ingredients,
+    type,
+    status,
+  } = req.body;
   try {
-    const item = Items.create(req.body);
+    const item = Items.create({
+      chef_id,
+      name,
+      unit,
+      portion_size,
+      price,
+      image,
+      available,
+      description,
+      ingredients,
+      allergic_ingredients,
+      type,
+      status,
+    });
+    if (!chef_id) {
+      throw new Error("Chef ID required");
+    }
     await item.save();
     res.status(201).json({
       status: 0,
@@ -54,4 +83,23 @@ const getItems = async (req: any, res: any, next: any) => {
   }
 };
 
-export default { createItem, getItems };
+const updateItem = async (req: any, res: any, next: any) => {
+  const { id } = req.params;
+  try {
+    if (!Object.keys(req.body).length) {
+      throw new Error("No updates found");
+    }
+    await Items.update({ id }, { ...req.body });
+    res.status(201).json({
+      status: 0,
+      message: "Record has been successfully updated",
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: 1,
+      message: error.message,
+    });
+  }
+};
+
+export default { createItem, getItems, updateItem };
