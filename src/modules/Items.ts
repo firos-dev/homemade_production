@@ -11,6 +11,7 @@ import {
 } from "typeorm";
 
 import { Chefs } from "./Chefs";
+import { Cuisines } from "./Cuisines";
 
 @Entity("items")
 export class Items extends BaseEntity {
@@ -66,6 +67,18 @@ export class Items extends BaseEntity {
     nullable: true,
   })
   ingredients: string;
+
+  @ManyToOne(() => Cuisines)
+  @JoinColumn({
+    name: "cuisine_id",
+  })
+  cuisine: Cuisines;
+
+  @Column({
+    name: "cuisine_id",
+    nullable: true,
+  })
+  cuisine_id: string;
 
   @Column({
     nullable: true,

@@ -17,6 +17,7 @@ export class Cuisines extends BaseEntity {
     name: string
     
     @Column({
+      unique: true,
         type: 'text'
     })
     image: string
