@@ -17,6 +17,8 @@ import { Roles } from "./Roles";
 import { Customers } from "./Customers";
 import { Chefs } from "./Chefs";
 import { Locations } from "./Locations";
+import { Orders } from "./Orders";
+import { Cart } from "./Cart";
 @Entity("users")
 export class Users extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -60,6 +62,12 @@ export class Users extends BaseEntity {
 
   @OneToMany(() => Locations, (location) => location.user)
   locations: Locations[];
+
+  @OneToMany(() => Orders, (location) => location.user)
+  orders: Orders[];
+
+  @OneToMany(() => Cart, (cart) => cart .user)
+  cart_items: Cart[];
 
   @Column({
     nullable: true,

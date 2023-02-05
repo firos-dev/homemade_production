@@ -1,8 +1,3 @@
-import { Availabilities } from "./modules/Availabilities";
-import { Chefs } from "./modules/Chefs";
-import { Customers } from "./modules/Customers";
-import { DeliveryPartners } from "./modules/DeliveryPartners";
-import { Dietries } from "./modules/Dietries";
 import express, { NextFunction, Request, Response } from "express";
 import { DataSource } from "typeorm";
 import { Users } from "./modules/User";
@@ -21,9 +16,19 @@ import { SpicyLevels } from "./modules/SpicyLevels";
 import { chefsRouter } from "./routes/chefs";
 import { Locations } from "./modules/Locations";
 import { locationsRouter } from "./routes/locations";
+import { Availabilities } from "./modules/Availabilities";
+import { Chefs } from "./modules/Chefs";
+import { Customers } from "./modules/Customers";
+import { DeliveryPartners } from "./modules/DeliveryPartners";
+import { Dietries } from "./modules/Dietries";
 import { availabilitiesRouter } from "./routes/availabilities";
 import { Items } from "./modules/Items";
 import { itemsRouter } from "./routes/items";
+import { Cart } from "./modules/Cart";
+import { Orders } from "./modules/Orders";
+import { OrderItems } from "./modules/OrderItems";
+import { cartRouter } from "./routes/cart";
+import { orderRouter } from "./routes/orders";
 
 require("dotenv").config();
 const app = express();
@@ -48,7 +53,10 @@ export const AppDataSource = new DataSource({
     Chefs,
     Locations,
     Availabilities,
-    Items
+    Items,
+    Cart,
+    Orders,
+    OrderItems,
   ],
   synchronize: true,
 });
@@ -79,6 +87,8 @@ export const AppDataSource = new DataSource({
   app.use(chefsRouter);
   app.use(locationsRouter);
   app.use(availabilitiesRouter);
+  app.use(cartRouter);
+  app.use(orderRouter);
   app.use((error: any, req: any, res: any, next: any) => {
     if (req.file) {
       fs.unlink(req.file.path, (err) => {

@@ -10,3 +10,30 @@ export enum AddressType {
   DROP_OFF_ADDRES = "DROP_OFF_ADDRES",
   DELIVERY_ADDRESS = "DELIVERY_ADDRESS",
 }
+
+export enum OrderStatus {
+  CREATED = "Created",
+  PREPARING = "Preparing",
+  REJECTED = "Rejected",
+  PROCESSING = "Processing",
+  DELIVERED = "Delivered",
+  COMPLETED = "Completed",
+}
+
+export enum OrderChefStatus {
+  RECIEVED = "Recieved",
+  PREPARING = "Preparing",
+  REJECTED = "Rejected",
+  READY = "Ready",
+  COMPLETED = "Completed",
+}
+
+export enum OrderDeliveryStatus {
+  RECIEVED = "Recieved",
+  REJECTED = "Rejected",
+  ACCEPTED = "Accepted",
+  READY_TO_PICK = "Ready to pick",
+  COLLECTED = "Collected",
+  READY_TO_DROP = "Ready to drop",
+  COMPLETED = "Completed",
+}
