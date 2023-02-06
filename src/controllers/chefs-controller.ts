@@ -208,7 +208,6 @@ const updateChef = async (req: any, res: any, next: any) => {
     res.status(201).json({
       status: 0,
       message: "Record has been successfully updated",
-      data: chef,
     });
   } catch (error) {
     console.log(error);

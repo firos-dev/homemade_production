@@ -15,6 +15,7 @@ export enum OrderStatus {
   CREATED = "Created",
   PREPARING = "Preparing",
   REJECTED = "Rejected",
+  CANCELLED = "Cancelled",
   PROCESSING = "Processing",
   DELIVERED = "Delivered",
   COMPLETED = "Completed",
