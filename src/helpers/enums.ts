@@ -38,3 +38,10 @@ export enum OrderDeliveryStatus {
   READY_TO_DROP = "Ready to drop",
   COMPLETED = "Completed",
 }
+
+export enum UserType {
+  CUSTOMER = "Customer",
+  CHEF = "Chef",
+  DELIVERY_PARTNER = "Deliver Partner",
+  SUPER_ADMIN = "Super Admin"
+}

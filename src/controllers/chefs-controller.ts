@@ -1,3 +1,4 @@
+import { UserType } from './../helpers/enums';
 import { AddressType } from "../helpers/enums";
 import { Locations } from "../modules/Locations";
 import { Users } from "../modules/User";
@@ -66,7 +67,7 @@ const createChef = async (req: any, res: any, next: any) => {
     if (userValues.length) {
       await Users.update(
         { id: user_id },
-        { first_name, middle_name, last_name, full_name }
+        { first_name, middle_name, last_name, full_name, user_type: UserType.CHEF }
       );
     }
     let chef;

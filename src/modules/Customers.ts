@@ -29,6 +29,12 @@ export class Customers extends BaseEntity {
   })
   image: String;
 
+  @Column({
+    type: "boolean",
+    default: false,
+  })
+  terms_accepted: boolean;
+  
   @CreateDateColumn()
   created_at: Date;
 

@@ -19,6 +19,7 @@ import { Chefs } from "./Chefs";
 import { Locations } from "./Locations";
 import { Orders } from "./Orders";
 import { Cart } from "./Cart";
+import { UserType } from "../helpers/enums";
 @Entity("users")
 export class Users extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -66,7 +67,7 @@ export class Users extends BaseEntity {
   @OneToMany(() => Orders, (location) => location.user)
   orders: Orders[];
 
-  @OneToMany(() => Cart, (cart) => cart .user)
+  @OneToMany(() => Cart, (cart) => cart.user)
   cart_items: Cart[];
 
   @Column({
@@ -114,6 +115,13 @@ export class Users extends BaseEntity {
     nullable: true,
   })
   image_url: string;
+
+  @Column({
+    type: "enum",
+    enum: UserType,
+    nullable: true,
+  })
+  user_type: UserType;
 
   @CreateDateColumn()
   created_at: Date;

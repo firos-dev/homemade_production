@@ -24,16 +24,17 @@ router.post("/api/register", async (req, res) => {
     if (password && password !== confirm_password) {
       throw new Error("Password missmatch");
     }
-    let registeredUser : any;
-    let error :any;
-    await findUserByMobile(mobile).then((result) => {
-      registeredUser = result
-    }).catch((err) => {
-      error= err
-    })
-    
-    
-    if(!error){
+    let registeredUser: any;
+    let error: any;
+    await findUserByMobile(mobile)
+      .then((result) => {
+        registeredUser = result;
+      })
+      .catch((err) => {
+        error = err;
+      });
+
+    if (!error) {
       return res.status(200).json({
         status: 0,
         message: "Mobile number already registered,",
@@ -47,7 +48,7 @@ router.post("/api/register", async (req, res) => {
         },
       });
     }
-    
+
     const user: any = Users.create({
       first_name,
       last_name,
@@ -159,6 +160,7 @@ router.post("/api/validate/otp", async (req, res) => {
           email: user.email,
           mobile: user.mobile,
           image_url: user.image_url,
+          user_type: user.user_type,
         },
         token: token,
       });

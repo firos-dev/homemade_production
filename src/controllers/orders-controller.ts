@@ -90,4 +90,37 @@ const getOrders = async (req: any, res: any, next: any) => {
   }
 };
 
-export default { createOrder, getOrders };
+const updateOrder = async (req: any, res: any, next: any) => {
+  const { id } = req.params;
+  const updates = Object.keys(req.body);
+  const allowedUpdates = [
+    "order_status",
+    "order_chef_status",
+    "order_delivery_status",
+  ];
+  const isValidOperaton = updates.every((update) =>
+    allowedUpdates.includes(update)
+  );
+
+  try {
+    if (!isValidOperaton) {
+      throw new Error("Invalid updates!");
+    }
+
+    await Orders.update({ id }, req.body);
+
+    res.status(200).json({
+      status: 0,
+      message: "Record has been succefully updated",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.messages,
+    });
+  }
+};
+
+export default { createOrder, getOrders, updateOrder };

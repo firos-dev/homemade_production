@@ -5,4 +5,5 @@ const router = express.Router();
 
 router.post("/api/customer", auth, customerController.createCustomer);
 router.get("/api/customers", auth, customerController.getCustomers);
+router.patch("/api/customer/:id", auth, customerController.updateCustomer);
 export { router as customerRouter };
