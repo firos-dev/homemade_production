@@ -8,7 +8,7 @@ import {
 import { OrderItems } from "../modules/OrderItems";
 
 const createOrder = async (req: any, res: any, next: any) => {
-  const { user_id, delivery_charge, discound_amount, offer_amount, items } =
+  const { user_id, delivery_charge, discound_amount, offer_amount, items, chef_id } =
     req.body;
   try {
     if (!user_id) {
@@ -17,6 +17,7 @@ const createOrder = async (req: any, res: any, next: any) => {
 
     const order = Orders.create({
       user_id,
+      chef_id,
       delivery_charge,
       discound_amount,
       offer_amount,

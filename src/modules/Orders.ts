@@ -14,6 +14,7 @@ import {
 } from "typeorm";
 import { Users } from "./User";
 import { OrderItems } from "./OrderItems";
+import { Chefs } from "./Chefs";
 
 @Entity("orders")
 export class Orders extends BaseEntity {
@@ -26,6 +27,15 @@ export class Orders extends BaseEntity {
 
   @Column()
   user_id: String;
+
+  @ManyToOne(() => Chefs, (chef) => chef.orders)
+  @JoinColumn({ name: "chef_id" })
+  chef: Users;
+
+  @Column({
+    nullable: true
+  })
+  chef_id: String;
 
   @OneToMany(() => OrderItems, (items) => items.order)
   items: OrderItems[];

@@ -1,3 +1,4 @@
+import { Orders } from "./Orders";
 import { SpicyLevels } from "./SpicyLevels";
 import { Cuisines } from "./Cuisines";
 import { Users } from "./User";
@@ -11,6 +12,7 @@ import {
   OneToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from "typeorm";
 import { Roles } from "./Roles";
 import { Dietries } from "./Dietries";
@@ -55,6 +57,9 @@ export class Chefs extends BaseEntity {
     name: "dietry_id",
   })
   dietry: Dietries;
+
+  @OneToMany(() => Orders, (order) => order.chef)
+  orders: Orders[];
 
   @Column({
     nullable: true,
