@@ -1,43 +1,43 @@
 import { Status } from "../helpers/enums";
 import {
-    Entity,
-    BaseEntity,
-    PrimaryGeneratedColumn,
-    Column,
-    UpdateDateColumn,
-    CreateDateColumn,
-  } from "typeorm";
-  
+  Entity,
+  BaseEntity,
+  PrimaryGeneratedColumn,
+  Column,
+  UpdateDateColumn,
+  CreateDateColumn,
+} from "typeorm";
+
 @Entity("cuisines")
 export class Cuisines extends BaseEntity {
-    @PrimaryGeneratedColumn('uuid')
-    id: string
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
-    @Column()
-    name: string
-    
-    @Column({
-      unique: true,
-        type: 'text'
-    })
-    image: string
+  @Column({
+    unique: true,
+  })
+  name: string;
 
-    @Column({
-      nullable: true,
-    })
-    icon: string
+  @Column({
+    type: "text",
+  })
+  image: string;
 
-    @Column({
-        type: 'enum',
-        enum: Status,
-        default: Status.ACTIVE
-    })
-    status: string
+  @Column({
+    nullable: true,
+  })
+  icon: string;
 
-    @CreateDateColumn()
-    created_at: Date;
+  @Column({
+    type: "enum",
+    enum: Status,
+    default: Status.ACTIVE,
+  })
+  status: string;
 
-    @UpdateDateColumn()
-    updated_at: Date;
+  @CreateDateColumn()
+  created_at: Date;
 
+  @UpdateDateColumn()
+  updated_at: Date;
 }

@@ -14,7 +14,6 @@ import {
   OneToMany,
 } from "typeorm";
 import { Users } from "./User";
-import { OrderItems } from './OrderItems';
 
 @Entity("cart")
 export class Cart extends BaseEntity {

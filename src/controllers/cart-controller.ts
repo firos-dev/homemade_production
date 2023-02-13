@@ -43,7 +43,7 @@ const getCart = async (req: any, res: any, next: any) => {
     const cart = await Cart.find({
       where: body,
       ...offset,
-      relations: ["user"],
+      relations: ["user", "item"],
       order: { created_at: "DESC" },
     });
     res.status(200).json({

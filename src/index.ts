@@ -29,6 +29,7 @@ import { Orders } from "./modules/Orders";
 import { OrderItems } from "./modules/OrderItems";
 import { cartRouter } from "./routes/cart";
 import { orderRouter } from "./routes/orders";
+import { setCommonHeaders } from "./helpers/cors";
 
 require("dotenv").config();
 const app = express();
@@ -62,6 +63,7 @@ export const AppDataSource = new DataSource({
 });
 
 (() => {
+  app.use(setCommonHeaders());
   AppDataSource.initialize()
     .then(() => {
       console.log("Data Source has been initialized!");

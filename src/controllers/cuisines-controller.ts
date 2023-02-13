@@ -11,6 +11,8 @@ const createCuisine = async (req: any, res: any, next: any) => {
       data: cuisine,
     });
   } catch (error) {
+    console.log(error);
+    
     res.status(400).json({
       status: 0,
       message: error.message,

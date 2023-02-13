@@ -11,10 +11,12 @@ export const findUserByCred = async (username: string, password: string) => {
     await Users.findOne({ where: { username } }).then(async (user: any) => {
       if (!user) {
         reject("Unable to login");
+        return
       }
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         reject("Unable to login");
+        return
       }
       resolve(user);
     });
