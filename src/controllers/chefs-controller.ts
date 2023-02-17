@@ -1,4 +1,4 @@
-import { UserType } from './../helpers/enums';
+import { UserType } from "./../helpers/enums";
 import { AddressType } from "../helpers/enums";
 import { Locations } from "../modules/Locations";
 import { Users } from "../modules/User";
@@ -67,7 +67,13 @@ const createChef = async (req: any, res: any, next: any) => {
     if (userValues.length) {
       await Users.update(
         { id: user_id },
-        { first_name, middle_name, last_name, full_name, user_type: UserType.CHEF }
+        {
+          first_name,
+          middle_name,
+          last_name,
+          full_name,
+          user_type: UserType.CHEF,
+        }
       );
     }
     let chef;
@@ -179,11 +185,15 @@ const updateChef = async (req: any, res: any, next: any) => {
     "full_name",
     "email",
     "mobile",
+  ];
+
+  let chefUpdate = [
+    "bio",
+    "image",
+    "drop_off_point",
     "certificate_number",
     "certificate_file",
   ];
-
-  let chefUpdate = ["bio", "image", "drop_off_point"];
 
   const keys = Object.keys(req.body);
 

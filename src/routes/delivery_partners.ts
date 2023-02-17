@@ -1,8 +1,26 @@
 import express from "express";
-import delivery_partnerController from "../controllers/delivery_partner-controller";
+import deliveryPartnerController from "../controllers/delivery_partner-controller";
 import auth from "../middleware/auth";
 const router = express.Router();
 
-router.post("/api/delivery_partner", auth, delivery_partnerController.createDeliveryPartner);
-router.get("/api/delivery_partners", auth, delivery_partnerController.getDeliveryPartners);
+router.post(
+  "/api/delivery_partner",
+  auth,
+  deliveryPartnerController.createDeliveryPartner
+);
+router.get(
+  "/api/delivery_partners",
+  auth,
+  deliveryPartnerController.getDeliveryPartners
+);
+router.patch(
+  "/api/delivery_partner/:id",
+  auth,
+  deliveryPartnerController.updateDeliveryPartner
+);
+router.patch(
+  "/api/delivery_partner/user/:id",
+  auth,
+  deliveryPartnerController.updateDeliveryPartnerUser
+);
 export { router as deliveryPartnersRouter };

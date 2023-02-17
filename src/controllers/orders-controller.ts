@@ -98,6 +98,7 @@ const updateOrder = async (req: any, res: any, next: any) => {
     "order_status",
     "order_chef_status",
     "order_delivery_status",
+    "delivery_partner_id"
   ];
   const isValidOperaton = updates.every((update) =>
     allowedUpdates.includes(update)

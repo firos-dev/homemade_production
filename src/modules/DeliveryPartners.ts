@@ -1,43 +1,77 @@
+import { Orders } from "./Orders";
+import { SpicyLevels } from "./SpicyLevels";
+import { Cuisines } from "./Cuisines";
 import { Users } from "./User";
-import { Status } from "src/helpers/enums";
 import {
-  BaseEntity,
   Entity,
+  BaseEntity,
   PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
   Column,
+  OneToOne,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToOne,
-  JoinColumn,
+  OneToMany,
 } from "typeorm";
-
+import { Roles } from "./Roles";
+import { Dietries } from "./Dietries";
+import { Locations } from "./Locations";
 @Entity("delivery_partners")
 export class DeliveryPartners extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
-  name: string;
-
   @OneToOne(() => Users)
-  @JoinColumn({
-    name: "user_id",
-  })
+  @JoinColumn({ name: "user_id" })
   user: Users;
 
   @Column()
-  user_id: string;
+  user_id: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  image: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  bio: string;
+
+  @OneToMany(() => Orders, (order) => order.delivery_partner)
+  orders: Orders[];
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  licence_file: String;
 
   @Column({
     nullable: true,
   })
-  image: string;
+  licence_number: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  description: String;
 
   @Column({
     type: "boolean",
     default: false,
   })
   online: boolean;
+
+  @Column({
+    type: "boolean",
+    default: false,
+  })
+  terms_accepted: boolean;
 
   @CreateDateColumn()
   created_at: Date;
