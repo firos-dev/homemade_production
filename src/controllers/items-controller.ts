@@ -3,6 +3,7 @@ import { Items } from "../modules/Items";
 const createItem = async (req: any, res: any, next: any) => {
   const {
     chef_id,
+    cuisine_id,
     name,
     unit,
     portion_size,
@@ -18,6 +19,7 @@ const createItem = async (req: any, res: any, next: any) => {
   try {
     const item = Items.create({
       chef_id,
+      cuisine_id,
       name,
       unit,
       portion_size,
