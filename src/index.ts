@@ -1,4 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
+import http from "http";
+import { Server } from "socket.io";
 import { DataSource } from "typeorm";
 import { Users } from "./modules/User";
 import { userRouter } from "./routes/user";
@@ -30,9 +32,21 @@ import { OrderItems } from "./modules/OrderItems";
 import { cartRouter } from "./routes/cart";
 import { orderRouter } from "./routes/orders";
 import { setCommonHeaders } from "./helpers/cors";
+import { Followers } from "./modules/Followers";
+import { followersRouter } from "./routes/followers";
 
 require("dotenv").config();
 const app = express();
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["PUT", "GET", "POST", "DELETE", "OPTIONS"],
+    credentials: false
+  },
+});
+
 let portEnv = process.env.DB_PORT || 5432;
 let dbPort: number = +portEnv;
 export const AppDataSource = new DataSource({
@@ -58,6 +72,7 @@ export const AppDataSource = new DataSource({
     Cart,
     Orders,
     OrderItems,
+    Followers,
   ],
   synchronize: true,
 });
@@ -91,6 +106,7 @@ export const AppDataSource = new DataSource({
   app.use(availabilitiesRouter);
   app.use(cartRouter);
   app.use(orderRouter);
+  app.use(followersRouter);
   app.use((error: any, req: any, res: any, next: any) => {
     if (req.file) {
       fs.unlink(req.file.path, (err) => {
@@ -104,9 +120,16 @@ export const AppDataSource = new DataSource({
     res.json({ message: error.message || "An unknown error occurred!" });
   });
 
+  io.on("connection", (socket) => {
+    console.log("a user connected");
+    socket.on("hello from client", (...args) => {
+      console.log("Hello from user");
+    });
+  });
+
   const port = process.env.PORT;
 
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`App running on port ${port}`);
   });
 })();

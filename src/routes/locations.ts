@@ -9,6 +9,7 @@ router.post(
   locationsController.createDropOffPoint
 );
 router.get("/api/drop_off_point", auth, locationsController.getDropOffPoints);
+router.post("/api/location", auth, locationsController.createLocation);
 router.get("/api/locations", auth, locationsController.getLocations);
 router.patch("/api/location/:id", auth, locationsController.updateLocaion);
 export { router as locationsRouter };

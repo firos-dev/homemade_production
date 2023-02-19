@@ -1,4 +1,4 @@
-import { OrderChefStatus, OrderDeliveryStatus } from './../helpers/enums';
+import { OrderChefStatus, OrderDeliveryStatus } from "./../helpers/enums";
 import { OrderStatus, Status } from "../helpers/enums";
 import {
   Entity,
@@ -12,16 +12,15 @@ import {
   ManyToOne,
 } from "typeorm";
 import { Users } from "./User";
-import { Orders } from './Orders';
-import { Items } from './Items';
+import { Orders } from "./Orders";
+import { Items } from "./Items";
 
 @Entity("order_items")
 export class OrderItems extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @ManyToOne(() => Orders,
-  (order) => order.items)
+  @ManyToOne(() => Orders, (order) => order.items)
   @JoinColumn({ name: "order_id" })
   order: Users;
 
@@ -54,11 +53,45 @@ export class OrderItems extends BaseEntity {
     nullable: true,
   })
   offer_amount: string;
-  
+
+  @Column({
+    nullable: true,
+  })
+  name: string;
+
+  @Column({
+    nullable: true,
+  })
+  portion_size: string;
+
+  @Column({
+    nullable: true,
+  })
+  image: string;
+
+  @Column({
+    nullable: true,
+  })
+  description: string;
+
+  @Column({
+    nullable: true,
+  })
+  ingredients: string;
+
+  @Column({
+    nullable: true,
+  })
+  type: string;
+
+  @Column({
+    nullable: true,
+  })
+  allergic_ingredients: string;
+
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
-
 }

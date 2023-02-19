@@ -13,9 +13,18 @@ const createLocation = async (req: any, res: any, next: any) => {
     city,
     zip_code,
     country,
+    label_address,
+    building_name,
+    floor_number,
+    door_number,
+    landmark,
+    contact_number,
     address_type,
   } = req.body;
   try {
+    if (!user_id) {
+      throw new Error("Please provide user ID");
+    }
     const location = Locations.create({
       user_id,
       address_line_one,
@@ -27,6 +36,12 @@ const createLocation = async (req: any, res: any, next: any) => {
       city,
       zip_code,
       country,
+      label_address,
+      building_name,
+      floor_number,
+      door_number,
+      landmark,
+      contact_number,
       address_type,
     });
     await location.save();

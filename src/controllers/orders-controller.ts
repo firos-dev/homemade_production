@@ -8,8 +8,16 @@ import {
 import { OrderItems } from "../modules/OrderItems";
 
 const createOrder = async (req: any, res: any, next: any) => {
-  const { user_id, delivery_charge, discound_amount, offer_amount, items, chef_id } =
-    req.body;
+  const {
+    user_id,
+    delivery_charge,
+    discound_amount,
+    offer_amount,
+    items,
+    chef_id,
+    delivery_date,
+    delivery_time,
+  } = req.body;
   try {
     if (!user_id) {
       throw new Error("Chef ID required");
@@ -19,6 +27,8 @@ const createOrder = async (req: any, res: any, next: any) => {
       user_id,
       chef_id,
       delivery_charge,
+      delivery_date,
+      delivery_time,
       discound_amount,
       offer_amount,
       order_status: OrderStatus.CREATED,
@@ -26,7 +36,7 @@ const createOrder = async (req: any, res: any, next: any) => {
       order_delivery_status: OrderDeliveryStatus.RECIEVED,
     });
 
-    await order.save().then(async (data: any) => {
+    await order.save().then(async () => {
       const orderItems: any = items.map((item: any) => {
         return {
           ...item,
@@ -98,7 +108,7 @@ const updateOrder = async (req: any, res: any, next: any) => {
     "order_status",
     "order_chef_status",
     "order_delivery_status",
-    "delivery_partner_id"
+    "delivery_partner_id",
   ];
   const isValidOperaton = updates.every((update) =>
     allowedUpdates.includes(update)
@@ -109,7 +119,7 @@ const updateOrder = async (req: any, res: any, next: any) => {
       throw new Error("Invalid updates!");
     }
 
-    await Orders.update({ id }, req.body);
+  await Orders.update({ id }, req.body);
 
     res.status(200).json({
       status: 0,

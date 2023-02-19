@@ -1,3 +1,4 @@
+import { Followers } from './Followers';
 import {
   Entity,
   BaseEntity,
@@ -63,6 +64,12 @@ export class Users extends BaseEntity {
 
   @OneToMany(() => Locations, (location) => location.user)
   locations: Locations[];
+
+  @OneToMany(() => Followers, (follow) => follow.followed_by)
+  following: Followers[];
+
+  @OneToMany(() => Followers, (follow) => follow.follow)
+  followers: Followers[];
 
   @OneToMany(() => Orders, (location) => location.user)
   orders: Orders[];

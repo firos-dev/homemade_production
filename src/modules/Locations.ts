@@ -70,6 +70,36 @@ export class Locations extends BaseEntity {
   @Column({
     nullable: true,
   })
+  label_address: string;
+
+  @Column({
+    nullable: true,
+  })
+  building_name: string;
+
+  @Column({
+    nullable: true,
+  })
+  floor_number: string;
+
+  @Column({
+    nullable: true,
+  })
+  door_number: string;
+
+  @Column({
+    nullable: true,
+  })
+  landmark: string;
+
+  @Column({
+    nullable: true,
+  })
+  contact_number: string;
+
+  @Column({
+    nullable: true,
+  })
   country: string;
 
   @Column({

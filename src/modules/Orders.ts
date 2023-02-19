@@ -74,6 +74,18 @@ export class Orders extends BaseEntity {
   delivery_charge: string;
 
   @Column({
+    type: "date",
+    nullable: true,
+  })
+  delivery_date: string;
+
+  @Column({
+    type: "time",
+    nullable: true,
+  })
+  delivery_time: string;
+
+  @Column({
     nullable: true,
   })
   discound_amount: string;
