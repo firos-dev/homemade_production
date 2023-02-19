@@ -41,9 +41,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["PUT", "GET", "POST", "DELETE", "OPTIONS"],
-    credentials: false
+    origin: "http://localhost:5500",
   },
 });
 
@@ -122,8 +120,9 @@ export const AppDataSource = new DataSource({
 
   io.on("connection", (socket) => {
     console.log("a user connected");
-    socket.on("hello from client", (...args) => {
-      console.log("Hello from user");
+    socket.on("live_location", (...args) => {
+      console.log(args);
+      io.emit("live_to_cutomer", args);
     });
   });
 
