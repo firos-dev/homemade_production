@@ -3,6 +3,10 @@ import { AddressType } from "../helpers/enums";
 import { Locations } from "../modules/Locations";
 import { Users } from "../modules/User";
 import { Chefs } from "./../modules/Chefs";
+import uploadFile from "../helpers/s3";
+import { promisify } from "util";
+import fs from "fs";
+const unlinkAsync = promisify(fs.unlink);
 
 const createChef = async (req: any, res: any, next: any) => {
   const {
@@ -12,14 +16,12 @@ const createChef = async (req: any, res: any, next: any) => {
     last_name,
     full_name,
     bio,
-    image,
     cuisine_id,
     dietry_id,
     spicy_level_id,
     description,
     terms_accepted,
     drop_off_point_id,
-    certificate_file,
     certificate_number,
     address_line_one,
     address_line_two,
@@ -59,7 +61,43 @@ const createChef = async (req: any, res: any, next: any) => {
   ];
   const keys = Object.keys(req.body);
 
+  let imageKey, imageUrl;
+  let certificateKey, certificateUrl;
+
   try {
+    const { image, certificate_file } = req.files;
+
+    let imageUploaded = image && image !== "undefined";
+
+    let certificateUploaded =
+      certificate_file && certificate_file !== "undefined";
+
+    if (imageUploaded || certificateUploaded) {
+      if (imageUploaded) {
+        let imageResult = await uploadFile(
+          image[0],
+          `${user_id}/avatars/` + image[0].filename
+        );
+
+        if (imageResult) {
+          imageKey = imageResult.Key;
+          imageUrl = imageResult.Location;
+        }
+        await unlinkAsync(image[0].path);
+      }
+      if (certificateUploaded) {
+        let certificateResult = await uploadFile(
+          certificate_file[0],
+          `${user_id}/certificates/` + certificate_file[0].filename
+        );
+
+        if (certificateResult) {
+          certificateKey = certificateResult.Key;
+          certificateUrl = certificateResult.Location;
+        }
+        await unlinkAsync(certificate_file[0].path);
+      }
+    }
     let userValues = keys.filter((value) => userUpdate.includes(value));
     let chefValues = keys.filter((value) => chefCreate.includes(value));
     let locationValues = keys.filter((value) => locationUpdate.includes(value));
@@ -81,14 +119,16 @@ const createChef = async (req: any, res: any, next: any) => {
       chef = Chefs.create({
         user_id,
         bio,
-        image,
+        image: imageUrl,
+        image_key: imageKey,
         cuisine_id,
         dietry_id,
         spicy_level_id,
         description,
         terms_accepted,
         drop_off_point_id,
-        certificate_file,
+        certificate_file: certificateUrl,
+        certificate_key: certificateKey,
         certificate_number,
       });
       await chef.save();
@@ -186,12 +226,10 @@ const updateChef = async (req: any, res: any, next: any) => {
     last_name,
     full_name,
     bio,
-    image,
     email,
     mobile,
     drop_off_point,
     certificate_number,
-    certificate_file,
   } = req.body;
 
   let userUpdate = [
@@ -213,8 +251,44 @@ const updateChef = async (req: any, res: any, next: any) => {
 
   const keys = Object.keys(req.body);
 
+  let imageKey, imageUrl;
+  let certificateKey, certificateUrl;
   try {
     let chef: any = await Chefs.findOne({ where: { id } });
+
+    const { image, certificate_file } = req.files;
+
+    let imageUploaded = image && image !== "undefined";
+
+    let certificateUploaded =
+      certificate_file && certificate_file !== "undefined";
+
+    if (imageUploaded || certificateUploaded) {
+      if (imageUploaded) {
+        let imageResult = await uploadFile(
+          image[0],
+          `${chef.user_id}/avatars/` + image[0].filename
+        );
+
+        if (imageResult) {
+          imageKey = imageResult.Key;
+          imageUrl = imageResult.Location;
+        }
+        await unlinkAsync(image[0].path);
+      }
+      if (certificateUploaded) {
+        let certificateResult = await uploadFile(
+          certificate_file[0],
+          `${chef.user_id}/certificates/` + certificate_file[0].filename
+        );
+
+        if (certificateResult) {
+          certificateKey = certificateResult.Key;
+          certificateUrl = certificateResult.Location;
+        }
+        await unlinkAsync(certificate_file[0].path);
+      }
+    }
 
     let userValues = keys.filter((value) => userUpdate.includes(value));
     let chefValues = keys.filter((value) => chefUpdate.includes(value));
@@ -226,10 +300,21 @@ const updateChef = async (req: any, res: any, next: any) => {
       );
     }
     if (chefValues) {
-      await Chefs.update(
-        { id },
-        { bio, image, certificate_number, certificate_file, drop_off_point }
-      );
+      let bdy: any = {
+        bio,
+        image_key: imageKey,
+        certificate_number,
+        drop_off_point,
+      };
+      if (image) {
+        bdy.image = imageUrl;
+        bdy.image_key = imageKey;
+      }
+      if (certificate_file) {
+        bdy.certificate_file = certificateUrl;
+        bdy.certificate_key = certificateKey;
+      }
+      await Chefs.update({ id }, bdy);
     }
 
     res.status(201).json({

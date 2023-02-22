@@ -35,6 +35,12 @@ export class Chefs extends BaseEntity {
   })
   image: String;
 
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  image_key: String;
+
   @ManyToOne(() => Cuisines)
   @JoinColumn({
     name: "cuisine_id",
@@ -93,6 +99,12 @@ export class Chefs extends BaseEntity {
     nullable: true,
   })
   certificate_file: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  certificate_key: String;
 
   @Column({
     nullable: true,

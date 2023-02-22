@@ -29,9 +29,46 @@ export class Availabilities extends BaseEntity {
   chef_id: String;
 
   @Column({
-    type: "date",
+    type: "boolean",
+    default: false,
   })
-  date: String;
+  sunday: Boolean;
+
+  @Column({
+    type: "boolean",
+    default: false,
+  })
+  monday: Boolean;
+
+  @Column({
+    type: "boolean",
+    default: false,
+  })
+  tuesday: Boolean;
+
+  @Column({
+    type: "boolean",
+    default: false,
+  })
+  wednesday: Boolean;
+
+  @Column({
+    type: "boolean",
+    default: false,
+  })
+  thursday: Boolean;
+
+  @Column({
+    type: "boolean",
+    default: false,
+  })
+  friday: Boolean;
+
+  @Column({
+    type: "boolean",
+    default: false,
+  })
+  saturday: Boolean;
 
   @CreateDateColumn()
   created_at: Date;
