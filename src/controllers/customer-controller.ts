@@ -122,7 +122,7 @@ const getCustomers = async (req: any, res: any, next: any) => {
     delete body.page;
     delete body.perPage;
   }
-  let relations = ["user"];
+  let relations = ["user", "user.locations"];
 
   if (req.body.includeFollowing) {
     relations.push("user.following");
@@ -134,7 +134,7 @@ const getCustomers = async (req: any, res: any, next: any) => {
     const customers = await Customers.find({
       where: body,
       ...offset,
-      relations: relations,
+      relations,
       order: { created_at: "DESC" },
     });
     res.status(200).json({

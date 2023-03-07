@@ -17,6 +17,7 @@ import {
 import { Roles } from "./Roles";
 import { Dietries } from "./Dietries";
 import { Locations } from "./Locations";
+import { Status } from "./../helpers/enums";
 @Entity("chefs")
 export class Chefs extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -110,6 +111,13 @@ export class Chefs extends BaseEntity {
     nullable: true,
   })
   certificate_number: String;
+
+  @Column({
+    type: "enum",
+    enum: Status,
+    default: Status.INACTIVE,
+  })
+  status: Status;
 
   @Column({
     type: "text",

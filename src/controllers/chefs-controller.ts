@@ -29,6 +29,7 @@ const createChef = async (req: any, res: any, next: any) => {
     longitude,
     area,
     state,
+    status,
     city,
     zip_code,
     country,
@@ -46,6 +47,7 @@ const createChef = async (req: any, res: any, next: any) => {
     "drop_off_point_id",
     "certificate_file",
     "certificate_number",
+    "status",
   ];
   let locationUpdate = [
     "address_line_one",
@@ -127,6 +129,7 @@ const createChef = async (req: any, res: any, next: any) => {
         description,
         terms_accepted,
         drop_off_point_id,
+        status,
         certificate_file: certificateUrl,
         certificate_key: certificateKey,
         certificate_number,
@@ -230,6 +233,7 @@ const updateChef = async (req: any, res: any, next: any) => {
     mobile,
     drop_off_point,
     certificate_number,
+    status,
   } = req.body;
 
   let userUpdate = [
@@ -244,9 +248,11 @@ const updateChef = async (req: any, res: any, next: any) => {
   let chefUpdate = [
     "bio",
     "image",
+    "image_key",
     "drop_off_point",
     "certificate_number",
     "certificate_file",
+    "status",
   ];
 
   const keys = Object.keys(req.body);
@@ -256,7 +262,11 @@ const updateChef = async (req: any, res: any, next: any) => {
   try {
     let chef: any = await Chefs.findOne({ where: { id } });
 
-    const { image, certificate_file } = req.files;
+    let image, certificate_file;
+    if (req.files) {
+      image = req.files.image;
+      certificate_file = req.files.certificate_file;
+    }
 
     let imageUploaded = image && image !== "undefined";
 
@@ -302,9 +312,9 @@ const updateChef = async (req: any, res: any, next: any) => {
     if (chefValues) {
       let bdy: any = {
         bio,
-        image_key: imageKey,
         certificate_number,
         drop_off_point,
+        status,
       };
       if (image) {
         bdy.image = imageUrl;
@@ -326,7 +336,7 @@ const updateChef = async (req: any, res: any, next: any) => {
 
     res.status(400).json({
       status: 1,
-      message: error.messages,
+      message: error.message,
     });
   }
 };

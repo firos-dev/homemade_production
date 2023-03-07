@@ -111,6 +111,8 @@ router.post("/api/login", async (req, res) => {
         throw new Error(e);
       });
   } catch (error) {
+    console.log(error);
+
     res.status(400).json({
       status: 1,
       message: error.message,

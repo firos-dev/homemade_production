@@ -28,6 +28,13 @@ export class Customers extends BaseEntity {
     nullable: true,
   })
   image: String;
+  
+  @Column({
+    type: "enum",
+    enum: Status,
+    default: Status.INACTIVE,
+  })
+  status: Status;
 
   @Column({
     type: "boolean",
