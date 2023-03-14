@@ -113,6 +113,12 @@ export class Chefs extends BaseEntity {
   certificate_number: String;
 
   @Column({
+    type: "boolean",
+    default: false
+  })
+  verified: Boolean;
+
+  @Column({
     type: "enum",
     enum: Status,
     default: Status.INACTIVE,

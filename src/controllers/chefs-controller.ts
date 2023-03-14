@@ -253,6 +253,7 @@ const updateChef = async (req: any, res: any, next: any) => {
     "certificate_number",
     "certificate_file",
     "status",
+    "verified"
   ];
 
   const keys = Object.keys(req.body);

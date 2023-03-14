@@ -17,6 +17,7 @@ import {
 import { Roles } from "./Roles";
 import { Dietries } from "./Dietries";
 import { Locations } from "./Locations";
+import { Status } from "./../helpers/enums";
 @Entity("delivery_partners")
 export class DeliveryPartners extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -72,6 +73,19 @@ export class DeliveryPartners extends BaseEntity {
     default: false,
   })
   terms_accepted: boolean;
+
+  @Column({
+    type: "boolean",
+    default: false,
+  })
+  verified: Boolean;
+
+  @Column({
+    type: "enum",
+    enum: Status,
+    default: Status.INACTIVE,
+  })
+  status: Status;
 
   @CreateDateColumn()
   created_at: Date;

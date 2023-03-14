@@ -183,6 +183,8 @@ const updateDeliveryPartnerUser = async (req: any, res: any, next: any) => {
     "terms_accepted",
     "licence_file",
     "licence_number",
+    "status",
+    "verified"
   ];
 
   const keys = Object.keys(req.body);
@@ -239,6 +241,7 @@ const updateDeliveryPartner = async (req: any, res: any, next: any) => {
     "licence_file",
     "licence_number",
     "online",
+    "verified"
   ];
 
   const isValidOperation = updates.every((update) =>
