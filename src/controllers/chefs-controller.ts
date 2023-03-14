@@ -234,6 +234,7 @@ const updateChef = async (req: any, res: any, next: any) => {
     drop_off_point,
     certificate_number,
     status,
+    verified
   } = req.body;
 
   let userUpdate = [
@@ -316,6 +317,7 @@ const updateChef = async (req: any, res: any, next: any) => {
         certificate_number,
         drop_off_point,
         status,
+        verified
       };
       if (image) {
         bdy.image = imageUrl;

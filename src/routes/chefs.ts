@@ -40,5 +40,5 @@ var upload = multer({ storage: storage }).fields([
 
 router.post("/api/chef", auth, upload, chefsController.createChef);
 router.get("/api/chefs", auth, chefsController.getChefs);
-router.patch("/api/chef/:id", upload, auth, chefsController.updateChef);
+router.patch("/api/chef/:id",auth, upload,chefsController.updateChef);
 export { router as chefsRouter };

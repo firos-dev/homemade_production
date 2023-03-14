@@ -40,6 +40,12 @@ export class DeliveryPartners extends BaseEntity {
     type: "text",
     nullable: true,
   })
+  image_key: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
   bio: string;
 
   @OneToMany(() => Orders, (order) => order.delivery_partner)
@@ -50,6 +56,12 @@ export class DeliveryPartners extends BaseEntity {
     nullable: true,
   })
   licence_file: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  licence_key: String;
 
   @Column({
     nullable: true,

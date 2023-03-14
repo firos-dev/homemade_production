@@ -3,6 +3,10 @@ import { Users } from "../modules/User";
 import { DeliveryPartners } from "../modules/DeliveryPartners";
 import { UserType } from "../helpers/enums";
 import { Locations } from "../modules/Locations";
+import uploadFile from "../helpers/s3";
+import { promisify } from "util";
+import fs from "fs";
+const unlinkAsync = promisify(fs.unlink);
 
 const createDeliveryPartner = async (req: any, res: any, next: any) => {
   const {
@@ -12,9 +16,7 @@ const createDeliveryPartner = async (req: any, res: any, next: any) => {
     last_name,
     full_name,
     email,
-    image,
     terms_accepted,
-    licence_file,
     licence_number,
     address_line_one,
     address_line_two,
@@ -53,8 +55,43 @@ const createDeliveryPartner = async (req: any, res: any, next: any) => {
     "country",
   ];
   const keys = Object.keys(req.body);
+  let imageKey, imageUrl;
+  let licenceKey, licenceUrl;
 
   try {
+    const { image, licence_file } = req.files;
+
+    let imageUploaded = image && image !== "undefined";
+
+    let licenceUploaded = licence_file && licence_file !== "undefined";
+
+    if (imageUploaded || licenceUploaded) {
+      if (imageUploaded) {
+        let imageResult = await uploadFile(
+          image[0],
+          `${user_id}/avatars/` + image[0].filename
+        );
+
+        if (imageResult) {
+          imageKey = imageResult.Key;
+          imageUrl = imageResult.Location;
+        }
+        await unlinkAsync(image[0].path);
+      }
+      if (licenceUploaded) {
+        let licenceResult = await uploadFile(
+          licence_file[0],
+          `${user_id}/certificates/` + licence_file[0].filename
+        );
+
+        if (licenceResult) {
+          licenceKey = licenceResult.Key;
+          licenceUrl = licenceResult.Location;
+        }
+        await unlinkAsync(licence_file[0].path);
+      }
+    }
+
     let userValues = keys.filter((value) => userUpdate.includes(value));
     let deliveryPartnerValues = keys.filter((value) =>
       deliverPartnerCreate.includes(value)
@@ -78,9 +115,11 @@ const createDeliveryPartner = async (req: any, res: any, next: any) => {
     if (deliveryPartnerValues.length) {
       chef = DeliveryPartners.create({
         user_id,
-        image,
+        image: imageUrl,
+        image_key: imageKey,
         terms_accepted,
-        licence_file,
+        licence_key: licenceKey,
+        licence_file: licenceUrl,
         licence_number,
       });
       await chef.save();
@@ -102,6 +141,8 @@ const createDeliveryPartner = async (req: any, res: any, next: any) => {
 
       await location.save();
     }
+
+    console.log(req.body);
 
     res.status(201).json({
       status: 0,
@@ -167,6 +208,8 @@ const updateDeliveryPartnerUser = async (req: any, res: any, next: any) => {
     terms_accepted,
     licence_file,
     licence_number,
+    status,
+    verified,
   } = req.body;
 
   let userUpdate = [
@@ -184,15 +227,49 @@ const updateDeliveryPartnerUser = async (req: any, res: any, next: any) => {
     "licence_file",
     "licence_number",
     "status",
-    "verified"
+    "verified",
   ];
 
   const keys = Object.keys(req.body);
-
+  let imageKey, imageUrl;
+  let licenceKey, licenceUrl;
   try {
     let deliveryPartner: any = await DeliveryPartners.findOne({
       where: { id },
     });
+
+    const { image, licence_file } = req.files;
+
+    let imageUploaded = image && image !== "undefined";
+
+    let licenceUploaded = licence_file && licence_file !== "undefined";
+
+    if (imageUploaded || licenceUploaded) {
+      if (imageUploaded) {
+        let imageResult = await uploadFile(
+          image[0],
+          `${deliveryPartner.user_id}/avatars/` + image[0].filename
+        );
+
+        if (imageResult) {
+          imageKey = imageResult.Key;
+          imageUrl = imageResult.Location;
+        }
+        await unlinkAsync(image[0].path);
+      }
+      if (licenceUploaded) {
+        let licenceResult = await uploadFile(
+          licence_file[0],
+          `${deliveryPartner.user_id}/certificates/` + licence_file[0].filename
+        );
+
+        if (licenceResult) {
+          licenceKey = licenceResult.Key;
+          licenceUrl = licenceResult.Location;
+        }
+        await unlinkAsync(licence_file[0].path);
+      }
+    }
 
     let userValues = keys.filter((value) => userUpdate.includes(value));
     let deliveryPartnerValues = keys.filter((value) =>
@@ -206,15 +283,24 @@ const updateDeliveryPartnerUser = async (req: any, res: any, next: any) => {
       );
     }
     if (deliveryPartnerValues) {
-      await DeliveryPartners.update(
-        { id },
-        {
-          image,
-          terms_accepted,
-          licence_file,
-          licence_number,
-        }
-      );
+      let bdy: any = {
+        image,
+        terms_accepted,
+        licence_file,
+        licence_number,
+        status,
+        verified,
+      };
+      if (image) {
+        bdy.image = imageUrl;
+        bdy.image_key = imageKey;
+      }
+      if (licence_file) {
+        bdy.licence_file = licenceUrl;
+        bdy.licence_key = licenceKey;
+      }
+
+      await DeliveryPartners.update({ id }, bdy);
     }
 
     res.status(201).json({
@@ -241,7 +327,7 @@ const updateDeliveryPartner = async (req: any, res: any, next: any) => {
     "licence_file",
     "licence_number",
     "online",
-    "verified"
+    "verified",
   ];
 
   const isValidOperation = updates.every((update) =>
