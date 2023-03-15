@@ -1,3 +1,4 @@
+import { Items } from "./../modules/Items";
 import { Status } from "../helpers/enums";
 import { Cuisines } from "../modules/Cuisines";
 
@@ -12,7 +13,7 @@ const createCuisine = async (req: any, res: any, next: any) => {
     });
   } catch (error) {
     console.log(error);
-    
+
     res.status(400).json({
       status: 0,
       message: error.message,
@@ -55,5 +56,32 @@ const getCuisines = async (req: any, res: any, next: any) => {
     });
   }
 };
+
+// const getCuisineItems = async (req: any, res: any, next: any) => {
+//   try {
+//     const cuisines = await Cuisines.find({
+//       order: { created_at: "DESC" },
+//     });
+
+//     if (cuisines.length) {
+//       return Promise.all(
+//         cuisines.map(async (cuisine) => {
+//           let items = await Items.find({ where: { cuisine_id: cuisine.id } });
+//         })
+//       );
+//     }
+//     res.status(200).json({
+//       status: 0,
+//       data: cuisines,
+//     });
+//   } catch (error) {
+//     console.log(error);
+
+//     res.status(400).json({
+//       status: 1,
+//       message: error.messages,
+//     });
+//   }
+// };
 
 export default { createCuisine, getCuisines };

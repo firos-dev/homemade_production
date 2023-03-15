@@ -17,13 +17,27 @@ var storage = multer.diskStorage({
     const ext = /[.]/.exec(file.originalname)
       ? /[^.]+$/.exec(file.originalname)
       : undefined;
-
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    callback(null, uniqueSuffix + "." + ext);
+    if (file.fieldname === "image") {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      callback(null, uniqueSuffix + "." + ext);
+    } else if (file.fieldname === "image2") {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      callback(null, uniqueSuffix + "." + ext);
+    }
   },
 });
 
-var upload = multer({ storage: storage }).single("image");
+
+var upload = multer({ storage: storage }).fields([
+  {
+    name: "image",
+    maxCount: 1,
+  },
+  {
+    name: "image2",
+    maxCount: 1,
+  },
+]);
 
 router.post("/api/item", auth, upload, itemsController.createItem);
 router.get("/api/items", auth, itemsController.getItems);

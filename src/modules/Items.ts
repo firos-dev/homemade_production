@@ -58,6 +58,16 @@ export class Items extends BaseEntity {
   image_key: string;
 
   @Column({
+    nullable: true,
+  })
+  image2: string;
+
+  @Column({
+    nullable: true,
+  })
+  image2_key: string;
+
+  @Column({
     type: "boolean",
     default: false,
   })

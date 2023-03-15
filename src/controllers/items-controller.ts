@@ -34,20 +34,40 @@ const createItem = async (req: any, res: any, next: any) => {
     type,
     status,
   } = req.body;
-  let file = req.file;
   let imageKey, imageUrl;
+  let image2Key, image2Url;
   try {
-    if (req.file) {
-      let imageResult = await uploadFile(
-        file,
-        `${chef_id}/items/` + file.filename
-      );
+    const { image, image2 } = req.files;
 
-      if (imageResult) {
-        imageKey = imageResult.Key;
-        imageUrl = imageResult.Location;
+    let imageUploaded = image && image !== "undefined";
+
+    let image2Uploaded = image2 && image2 !== "undefined";
+
+    if (imageUploaded || image2Uploaded) {
+      if (imageUploaded) {
+        let imageResult = await uploadFile(
+          image[0],
+          `${chef_id}/items/` + image[0].filename
+        );
+
+        if (imageResult) {
+          imageKey = imageResult.Key;
+          imageUrl = imageResult.Location;
+        }
+        await unlinkAsync(image[0].path);
       }
-      await unlinkAsync(file.path);
+      if (image2Uploaded) {
+        let image2Result = await uploadFile(
+          image2[0],
+          `${chef_id}/items/` + image2[0].filename
+        );
+
+        if (image2Result) {
+          image2Key = image2Result.Key;
+          image2Url = image2Result.Location;
+        }
+        await unlinkAsync(image2[0].path);
+      }
     }
 
     const item = Items.create({
@@ -59,6 +79,8 @@ const createItem = async (req: any, res: any, next: any) => {
       price,
       image: imageUrl,
       image_key: imageKey,
+      image2_key: image2Key,
+      image2: image2Url,
       available,
       description,
       ingredients,
@@ -123,26 +145,51 @@ const updateItem = async (req: any, res: any, next: any) => {
   const { id } = req.params;
   let file = req.file;
   let imageKey, imageUrl;
+  let image2Key, image2Url;
   try {
-    if (!Object.keys(req.body).length) {
-      throw new Error("No updates found");
-    }
+    const { image, image2 } = req.files;
+    let item: any = await Items.findOne(id);
 
-    if (req.file) {
-      let imageResult = await uploadFile(file, `${id}/items/` + file.filename);
+    let imageUploaded = image && image !== "undefined";
 
-      if (imageResult) {
-        imageKey = imageResult.Key;
-        imageUrl = imageResult.Location;
+    let image2Uploaded = image2 && image2 !== "undefined";
+
+    if (imageUploaded || image2Uploaded) {
+      if (imageUploaded) {
+        let imageResult = await uploadFile(
+          image[0],
+          `${item.chef_id}/items/` + image[0].filename
+        );
+
+        if (imageResult) {
+          imageKey = imageResult.Key;
+          imageUrl = imageResult.Location;
+        }
+        await unlinkAsync(image[0].path);
       }
-      await unlinkAsync(file.path);
+      if (image2Uploaded) {
+        let image2Result = await uploadFile(
+          image2[0],
+          `${item.chef_id}/items/` + image2[0].filename
+        );
+
+        if (image2Result) {
+          image2Key = image2Result.Key;
+          image2Url = image2Result.Location;
+        }
+        await unlinkAsync(image2[0].path);
+      }
     }
     let body = {
       ...req.body,
     };
-    if (file) {
+    if (image) {
       body.image = imageUrl;
       body.image_key = imageKey;
+    }
+    if (image2) {
+      body.image2 = image2Url;
+      body.image2_key = image2Key;
     }
     await Items.update({ id }, { ...req.body });
     res.status(201).json({
