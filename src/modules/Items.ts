@@ -48,24 +48,18 @@ export class Items extends BaseEntity {
   price: string;
 
   @Column({
+    type: "text",
+    array: true,
     nullable: true,
   })
-  image: string;
+  images: string[];
 
   @Column({
+    type: "text",
+    array: true,
     nullable: true,
   })
-  image_key: string;
-
-  @Column({
-    nullable: true,
-  })
-  image2: string;
-
-  @Column({
-    nullable: true,
-  })
-  image2_key: string;
+  image_keys: string[];
 
   @Column({
     type: "boolean",

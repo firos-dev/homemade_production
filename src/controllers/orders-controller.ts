@@ -6,6 +6,7 @@ import {
   OrderStatus,
 } from "../helpers/enums";
 import { OrderItems } from "../modules/OrderItems";
+import { Between } from "typeorm";
 
 const createOrder = async (req: any, res: any, next: any) => {
   const {
@@ -80,9 +81,19 @@ const getOrders = async (req: any, res: any, next: any) => {
     delete body.page;
     delete body.perPage;
   }
+
+  let where = body;
+
+  if (req.body.from) {
+    where = {
+      ...where,
+      delivery_date: Between(new Date(req.body.from), new Date(req.body.to)),
+    };
+  }
+
   try {
     const orders = await Orders.find({
-      where: body,
+      ...where,
       ...offset,
       relations: ["items", "user"],
       order: { created_at: "DESC" },
@@ -119,7 +130,7 @@ const updateOrder = async (req: any, res: any, next: any) => {
       throw new Error("Invalid updates!");
     }
 
-  await Orders.update({ id }, req.body);
+    await Orders.update({ id }, req.body);
 
     res.status(200).json({
       status: 0,

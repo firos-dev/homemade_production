@@ -34,41 +34,53 @@ const createItem = async (req: any, res: any, next: any) => {
     type,
     status,
   } = req.body;
-  let imageKey, imageUrl;
-  let image2Key, image2Url;
+
   try {
-    const { image, image2 } = req.files;
+    const imageArr = req.files;
+    let images: any = [];
+    let imageKeys: any = [];
 
-    let imageUploaded = image && image !== "undefined";
-
-    let image2Uploaded = image2 && image2 !== "undefined";
-
-    if (imageUploaded || image2Uploaded) {
-      if (imageUploaded) {
-        let imageResult = await uploadFile(
-          image[0],
-          `${chef_id}/items/` + image[0].filename
-        );
-
-        if (imageResult) {
-          imageKey = imageResult.Key;
-          imageUrl = imageResult.Location;
-        }
-        await unlinkAsync(image[0].path);
-      }
-      if (image2Uploaded) {
-        let image2Result = await uploadFile(
-          image2[0],
-          `${chef_id}/items/` + image2[0].filename
-        );
-
-        if (image2Result) {
-          image2Key = image2Result.Key;
-          image2Url = image2Result.Location;
-        }
-        await unlinkAsync(image2[0].path);
-      }
+    if (imageArr.length > 0) {
+      await Promise.all(
+        imageArr.map(async (image: any) => {
+          let imageResult = await uploadFile(
+            image,
+            `${chef_id}/items/` + image.filename
+          );
+          images.push(imageResult.Location);
+          imageKeys.push(imageResult.Key);
+          await unlinkAsync(image.path);
+        })
+      );
     }
+
+    console.log(images);
+    console.log(imageKeys);
+    // if (imageUploaded || image2Uploaded) {
+    //   if (imageUploaded) {
+    //     let imageResult = await uploadFile(
+    //       image[0],
+    //       `${chef_id}/items/` + image[0].filename
+    //     );
+
+    //     if (imageResult) {
+    //       imageKey = imageResult.Key;
+    //       imageUrl = imageResult.Location;
+    //     }
+    //     await unlinkAsync(image[0].path);
+    //   }
+    //   if (image2Uploaded) {
+    //     let image2Result = await uploadFile(
+    //       image2[0],
+    //       `${chef_id}/items/` + image2[0].filename
+    //     );
+
+    //     if (image2Result) {
+    //       image2Key = image2Result.Key;
+    //       image2Url = image2Result.Location;
+    //     }
+    //   }
+    // }
 
     const item = Items.create({
       chef_id,
@@ -77,10 +89,8 @@ const createItem = async (req: any, res: any, next: any) => {
       unit,
       portion_size,
       price,
-      image: imageUrl,
-      image_key: imageKey,
-      image2_key: image2Key,
-      image2: image2Url,
+      images: images,
+      image_keys: imageKeys,
       available,
       description,
       ingredients,

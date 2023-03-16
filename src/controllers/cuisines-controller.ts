@@ -57,31 +57,40 @@ const getCuisines = async (req: any, res: any, next: any) => {
   }
 };
 
-// const getCuisineItems = async (req: any, res: any, next: any) => {
-//   try {
-//     const cuisines = await Cuisines.find({
-//       order: { created_at: "DESC" },
-//     });
+const getCuisineItems = async (req: any, res: any, next: any) => {
+  try {
+    const cuisines = await Cuisines.find({
+      order: { created_at: "DESC" },
+    });
+    let cuisineData: any = [];
+    if (cuisines.length) {
+      return Promise.all(
+        cuisines.map(async (cuisine) => {
+          let [items, count] = await Items.findAndCount({
+            where: { cuisine_id: cuisine.id },
+            take: 2,
+          });
+          cuisineData.push({
+            ...cuisine,
+            items,
+            count,
+          });
+        })
+      ).then(() => {
+        res.status(200).json({
+          status: 0,
+          data: cuisineData,
+        });
+      });
+    }
+  } catch (error) {
+    console.log(error);
 
-//     if (cuisines.length) {
-//       return Promise.all(
-//         cuisines.map(async (cuisine) => {
-//           let items = await Items.find({ where: { cuisine_id: cuisine.id } });
-//         })
-//       );
-//     }
-//     res.status(200).json({
-//       status: 0,
-//       data: cuisines,
-//     });
-//   } catch (error) {
-//     console.log(error);
+    res.status(400).json({
+      status: 1,
+      message: error.messages,
+    });
+  }
+};
 
-//     res.status(400).json({
-//       status: 1,
-//       message: error.messages,
-//     });
-//   }
-// };
-
-export default { createCuisine, getCuisines };
+export default { createCuisine, getCuisines, getCuisineItems };
