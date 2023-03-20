@@ -16,6 +16,7 @@ import { Users } from "./User";
 import { OrderItems } from "./OrderItems";
 import { Chefs } from "./Chefs";
 import { DeliveryPartners } from "./DeliveryPartners";
+import { Locations } from "./Locations";
 
 @Entity("orders")
 export class Orders extends BaseEntity {
@@ -28,6 +29,15 @@ export class Orders extends BaseEntity {
 
   @Column()
   user_id: String;
+
+  @ManyToOne(() => Locations)
+  @JoinColumn({ name: "delivery_location_id" })
+  delivery_location: Locations;
+
+  @Column({
+    nullable: true,
+  })
+  delivery_location_id: string;
 
   @ManyToOne(() => Chefs, (chef) => chef.orders)
   @JoinColumn({ name: "chef_id" })

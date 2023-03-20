@@ -93,9 +93,9 @@ const getOrders = async (req: any, res: any, next: any) => {
 
   try {
     const orders = await Orders.find({
-      ...where,
+      where: { ...where },
       ...offset,
-      relations: ["items", "user"],
+      relations: ["items", "user", "delivery_location"],
       order: { created_at: "DESC" },
     });
     res.status(200).json({
