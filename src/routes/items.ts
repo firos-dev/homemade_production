@@ -55,21 +55,6 @@ const storage = multer.diskStorage({
 
 const multi_upload = multer({
   storage,
-  limits: { fileSize: 1 * 2048 * 2048 }, // 1MB
-  fileFilter: (req, file, cb) => {
-    if (
-      file.mimetype == "image/png" ||
-      file.mimetype == "image/jpg" ||
-      file.mimetype == "image/jpeg"
-    ) {
-      cb(null, true);
-    } else {
-      cb(null, false);
-      const err = new Error("Only .png, .jpg and .jpeg format allowed!");
-      err.name = "ExtensionError";
-      return cb(err);
-    }
-  },
 }).array("images", 2);
 
 const upload = (req: any, res: any, next: any) => {
