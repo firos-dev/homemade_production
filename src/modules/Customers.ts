@@ -16,7 +16,7 @@ export class Customers extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @OneToOne(() => Users)
+  @OneToOne(() => Users, (user) => user.customer)
   @JoinColumn({ name: "user_id" })
   user: Users;
 
@@ -28,7 +28,7 @@ export class Customers extends BaseEntity {
     nullable: true,
   })
   image: String;
-  
+
   @Column({
     type: "enum",
     enum: Status,
@@ -41,7 +41,7 @@ export class Customers extends BaseEntity {
     default: false,
   })
   terms_accepted: boolean;
-  
+
   @CreateDateColumn()
   created_at: Date;
 

@@ -23,7 +23,7 @@ export class Chefs extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @OneToOne(() => Users)
+  @OneToOne(() => Users, (user) => user.chef)
   @JoinColumn({ name: "user_id" })
   user: Users;
 

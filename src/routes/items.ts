@@ -55,7 +55,7 @@ const storage = multer.diskStorage({
 
 const multi_upload = multer({
   storage,
-}).array("images", 2);
+}).array("images", 7);
 
 const upload = (req: any, res: any, next: any) => {
   multi_upload(req, res, function (err) {

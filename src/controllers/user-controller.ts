@@ -11,12 +11,12 @@ export const findUserByCred = async (username: string, password: string) => {
     await Users.findOne({ where: { username } }).then(async (user: any) => {
       if (!user) {
         reject("Unable to login");
-        return
+        return;
       }
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         reject("Unable to login");
-        return
+        return;
       }
       resolve(user);
     });
@@ -98,6 +98,31 @@ export const generateOTP = async (user: any) => {
   await row.save();
 
   return otp;
+};
+
+export const updateUserType = async (req: any, res: any, next: any) => {
+  const { id } = req.params;
+  const { user_type } = req.body;
+
+  try {
+    const user = await Users.findOne({ where: { id } });
+    if (!user) {
+      throw new Error("Can't find user");
+    }
+    await Users.update({ id }, { user_type });
+
+    res.status(200).json({
+      status: 0,
+      message: "User has been successfully updated",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.message,
+    });
+  }
 };
 
 // export const generateRefreshToken = async (user: any) => {

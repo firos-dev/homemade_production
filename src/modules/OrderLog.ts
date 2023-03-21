@@ -14,6 +14,9 @@ import { Items } from "./Items";
 
 export enum Activity {
     CREATED = "Created",
+    START_PREPARING = "Start Preparing",
+    ASSIGN_DELIVERY = "Assign delivery",
+    
 
 }
 
@@ -29,4 +32,6 @@ export class OrderItems extends BaseEntity {
   @Column()
   order_id: String;
 
-}
+  @Column()
+
+} 

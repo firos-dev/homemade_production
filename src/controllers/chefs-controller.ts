@@ -191,6 +191,7 @@ const getChefs = async (req: any, res: any, next: any) => {
     "spicy_level",
     "dietry",
     "user.locations",
+    "drop_off_point",
   ];
 
   if (req.body.includeFollowing) {
@@ -228,13 +229,14 @@ const updateChef = async (req: any, res: any, next: any) => {
     middle_name,
     last_name,
     full_name,
+    user_type,
     bio,
     email,
     mobile,
     drop_off_point,
     certificate_number,
     status,
-    verified
+    verified,
   } = req.body;
 
   let userUpdate = [
@@ -244,6 +246,7 @@ const updateChef = async (req: any, res: any, next: any) => {
     "full_name",
     "email",
     "mobile",
+    "user_type",
   ];
 
   let chefUpdate = [
@@ -254,7 +257,7 @@ const updateChef = async (req: any, res: any, next: any) => {
     "certificate_number",
     "certificate_file",
     "status",
-    "verified"
+    "verified",
   ];
 
   const keys = Object.keys(req.body);
@@ -308,7 +311,15 @@ const updateChef = async (req: any, res: any, next: any) => {
     if (userValues) {
       await Users.update(
         { id: chef.user_id },
-        { first_name, middle_name, last_name, full_name, email, mobile }
+        {
+          first_name,
+          middle_name,
+          last_name,
+          full_name,
+          email,
+          mobile,
+          user_type,
+        }
       );
     }
     if (chefValues) {
@@ -317,7 +328,7 @@ const updateChef = async (req: any, res: any, next: any) => {
         certificate_number,
         drop_off_point,
         status,
-        verified
+        verified,
       };
       if (image) {
         bdy.image = imageUrl;

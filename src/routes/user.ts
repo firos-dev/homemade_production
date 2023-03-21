@@ -6,7 +6,9 @@ import {
   findUserByCred,
   findUserByMobile,
   generateToken,
+  updateUserType,
 } from "../controllers/user-controller";
+import auth from "../middleware/auth";
 
 router.post("/api/register", async (req, res) => {
   try {
@@ -204,6 +206,7 @@ router.post("/api/resend/otp", async (req, res) => {
   }
 });
 
+router.patch("/api/user/type/:id", auth, updateUserType);
 // router.post(validate)
 
 export { router as userRouter };
