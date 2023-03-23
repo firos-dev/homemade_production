@@ -34,6 +34,8 @@ import { orderRouter } from "./routes/orders";
 import { setCommonHeaders } from "./helpers/cors";
 import { Followers } from "./modules/Followers";
 import { followersRouter } from "./routes/followers";
+import { OrderLogs } from "./modules/OrderLogs";
+import { orderLogsRouter } from "./routes/order_logs";
 
 require("dotenv").config();
 const app = express();
@@ -71,6 +73,7 @@ export const AppDataSource = new DataSource({
     Orders,
     OrderItems,
     Followers,
+    OrderLogs,
   ],
   synchronize: true,
 });
@@ -105,6 +108,7 @@ export const AppDataSource = new DataSource({
   app.use(cartRouter);
   app.use(orderRouter);
   app.use(followersRouter);
+  app.use(orderLogsRouter)
   app.use((error: any, req: any, res: any, next: any) => {
     if (req.file) {
       fs.unlink(req.file.path, (err) => {

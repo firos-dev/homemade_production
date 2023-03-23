@@ -17,6 +17,7 @@ import { OrderItems } from "./OrderItems";
 import { Chefs } from "./Chefs";
 import { DeliveryPartners } from "./DeliveryPartners";
 import { Locations } from "./Locations";
+import { OrderLogs } from "./OrderLogs";
 
 @Entity("orders")
 export class Orders extends BaseEntity {
@@ -41,7 +42,7 @@ export class Orders extends BaseEntity {
 
   @ManyToOne(() => Chefs, (chef) => chef.orders)
   @JoinColumn({ name: "chef_id" })
-  chef: Users;
+  chef: Chefs;
 
   @Column({
     nullable: true,
@@ -50,7 +51,7 @@ export class Orders extends BaseEntity {
 
   @ManyToOne(() => DeliveryPartners, (delvery) => delvery.orders)
   @JoinColumn({ name: "delivery_partner_id" })
-  delivery_partner: Users;
+  delivery_partner: DeliveryPartners;
 
   @Column({
     nullable: true,
@@ -59,6 +60,9 @@ export class Orders extends BaseEntity {
 
   @OneToMany(() => OrderItems, (items) => items.order)
   items: OrderItems[];
+
+  @OneToMany(() => OrderLogs, (logs) => logs.order)
+  logs: OrderLogs[];
 
   @Column({
     type: "enum",
