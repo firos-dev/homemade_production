@@ -19,14 +19,24 @@ export class Cuisines extends BaseEntity {
   name: string;
 
   @Column({
-    type: "text",
+    nullable: true,
   })
   image: string;
 
   @Column({
     nullable: true,
   })
+  image_key: string;
+
+  @Column({
+    nullable: true,
+  })
   icon: string;
+
+  @Column({
+    nullable: true,
+  })
+  icon_key: string;
 
   @Column({
     type: "enum",

@@ -1,10 +1,56 @@
 import { Items } from "./../modules/Items";
 import { Status } from "../helpers/enums";
 import { Cuisines } from "../modules/Cuisines";
+import uploadFile from "../helpers/s3";
+import { promisify } from "util";
+import fs from "fs";
+const unlinkAsync = promisify(fs.unlink);
 
 const createCuisine = async (req: any, res: any, next: any) => {
+  let imageKey, imageUrl;
+  let iconKey, iconUrl;
   try {
-    const cuisine = Cuisines.create(req.body);
+    const { image, icon } = req.files;
+
+    let imageUploaded = image && image !== "undefined";
+
+    let iconUploaded = icon && icon !== "undefined";
+
+    if (imageUploaded || iconUploaded) {
+      if (imageUploaded) {
+        let imageResult = await uploadFile(
+          image[0],
+          `cuisines/images` + image[0].filename
+        );
+
+        if (imageResult) {
+          imageKey = imageResult.Key;
+          imageUrl = imageResult.Location;
+        }
+        await unlinkAsync(image[0].path);
+      }
+      if (iconUploaded) {
+        let iconResult = await uploadFile(
+          icon[0],
+          `cuisines/icons/` + icon[0].filename
+        );
+
+        if (iconResult) {
+          iconKey = iconResult.Key;
+          iconUrl = iconResult.Location;
+        }
+        await unlinkAsync(icon[0].path);
+      }
+    }
+
+    const body = {
+      ...req.body,
+      image: imageUrl,
+      icon: iconUrl,
+      image_key: imageKey,
+      icon_key: iconKey,
+    };
+    const cuisine = Cuisines.create(body);
     await cuisine.save();
     res.status(201).json({
       status: 0,

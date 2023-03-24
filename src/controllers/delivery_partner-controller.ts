@@ -328,6 +328,7 @@ const updateDeliveryPartner = async (req: any, res: any, next: any) => {
     "licence_number",
     "online",
     "verified",
+    "status"
   ];
 
   const isValidOperation = updates.every((update) =>
