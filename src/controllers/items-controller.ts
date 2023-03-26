@@ -53,9 +53,6 @@ const createItem = async (req: any, res: any, next: any) => {
         })
       );
     }
-
-    console.log(images);
-    console.log(imageKeys);
     // if (imageUploaded || image2Uploaded) {
     //   if (imageUploaded) {
     //     let imageResult = await uploadFile(
@@ -158,7 +155,7 @@ const updateItem = async (req: any, res: any, next: any) => {
   let image2Key, image2Url;
   try {
     const { image, image2 } = req.files;
-    let item: any = await Items.findOne(id);
+    let item: any = await Items.findOne({ where: { id } });
 
     let imageUploaded = image && image !== "undefined";
 
