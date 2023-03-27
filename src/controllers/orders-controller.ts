@@ -18,6 +18,7 @@ const createOrder = async (req: any, res: any, next: any) => {
     chef_id,
     delivery_date,
     delivery_time,
+    delivery_location_id,
   } = req.body;
   try {
     if (!user_id) {
@@ -35,6 +36,7 @@ const createOrder = async (req: any, res: any, next: any) => {
       order_status: OrderStatus.CREATED,
       order_chef_status: OrderChefStatus.RECIEVED,
       order_delivery_status: OrderDeliveryStatus.RECIEVED,
+      delivery_location_id,
     });
 
     await order.save().then(async () => {
@@ -121,22 +123,7 @@ const getOrders = async (req: any, res: any, next: any) => {
 
 const updateOrder = async (req: any, res: any, next: any) => {
   const { id } = req.params;
-  const updates = Object.keys(req.body);
-  const allowedUpdates = [
-    "order_status",
-    "order_chef_status",
-    "order_delivery_status",
-    "delivery_partner_id",
-  ];
-  const isValidOperaton = updates.every((update) =>
-    allowedUpdates.includes(update)
-  );
-
   try {
-    if (!isValidOperaton) {
-      throw new Error("Invalid updates!");
-    }
-
     await Orders.update({ id }, req.body);
 
     res.status(200).json({
