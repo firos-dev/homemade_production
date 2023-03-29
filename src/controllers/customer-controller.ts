@@ -2,6 +2,10 @@ import { AddressType, UserType } from "../helpers/enums";
 import { Locations } from "../modules/Locations";
 import { Users } from "../modules/User";
 import { Customers } from "./../modules/Customers";
+import uploadFile from "../helpers/s3";
+import { promisify } from "util";
+import fs from "fs";
+const unlinkAsync = promisify(fs.unlink);
 const createCustomer = async (req: any, res: any, next: any) => {
   const {
     user_id,
@@ -24,15 +28,6 @@ const createCustomer = async (req: any, res: any, next: any) => {
     country,
   } = req.body;
 
-  let userUpdate = [
-    "first_name",
-    "middle_name",
-    "last_name",
-    "full_name",
-    "email",
-    "mobile",
-  ];
-  let customerCreate = ["image", "terms_accepted"];
   let locationUpdate = [
     "address_line_one",
     "address_line_two",
@@ -48,33 +43,29 @@ const createCustomer = async (req: any, res: any, next: any) => {
   const keys = Object.keys(req.body);
 
   try {
-    let userValues = keys.filter((value) => userUpdate.includes(value));
-    let customerValues = keys.filter((value) => customerCreate.includes(value));
     let locationValues = keys.filter((value) => locationUpdate.includes(value));
 
-    if (userValues.length) {
-      await Users.update(
-        { id: user_id },
-        {
-          first_name,
-          middle_name,
-          last_name,
-          full_name,
-          user_type: UserType.CUSTOMER,
-          email,
-          mobile,
-        }
-      );
-    }
+    await Users.update(
+      { id: user_id },
+      {
+        first_name,
+        middle_name,
+        last_name,
+        full_name,
+        user_type: UserType.CUSTOMER,
+        email,
+        mobile,
+      }
+    );
     let customer;
-    if (customerValues.length) {
-      customer = Customers.create({
-        user_id,
-        image,
-        terms_accepted,
-      });
-      await customer.save();
-    }
+
+    customer = Customers.create({
+      user_id,
+      image,
+      terms_accepted,
+    });
+    await customer.save();
+
     if (locationValues.length) {
       const location = Locations.create({
         user_id,
@@ -87,7 +78,7 @@ const createCustomer = async (req: any, res: any, next: any) => {
         city,
         zip_code,
         country,
-        address_type: AddressType.SERVICE_ADDRES,
+        address_type: AddressType.CUSTOMER_ADDRESS,
       });
 
       await location.save();
@@ -116,12 +107,16 @@ const getCustomers = async (req: any, res: any, next: any) => {
     take: Number(perPage),
   };
 
-  let body = req.query;
+  let body = req.query || { user: null };
 
   if (body.page || body.perPage) {
     delete body.page;
     delete body.perPage;
   }
+  body = {
+    ...body,
+    user: { user_type: UserType.CUSTOMER },
+  };
   let relations = ["user", "user.locations"];
 
   if (req.body.includeFollowing) {
@@ -179,9 +174,24 @@ const updateCustomer = async (req: any, res: any, next: any) => {
   let chefUpdate = ["terms_accepted", "image"];
 
   const keys = Object.keys(req.body);
-
+  let imageKey, imageUrl;
   try {
     let customer: any = await Customers.findOne({ where: { id } });
+
+    const image = req.file;
+    let imageUploaded = image && image !== "undefined";
+    if (imageUploaded) {
+      let imageResult = await uploadFile(
+        image[0],
+        `${customer.user_id}/avatars/` + image[0].filename
+      );
+
+      if (imageResult) {
+        imageKey = imageResult.Key;
+        imageUrl = imageResult.Location;
+      }
+      await unlinkAsync(image[0].path);
+    }
 
     let userValues = keys.filter((value) => userUpdate.includes(value));
     let customerValues = keys.filter((value) => chefUpdate.includes(value));
@@ -201,7 +211,10 @@ const updateCustomer = async (req: any, res: any, next: any) => {
       );
     }
     if (customerValues) {
-      await Customers.update({ id }, { image, terms_accepted });
+      await Customers.update(
+        { id },
+        { image: imageUrl, image_key: imageKey, terms_accepted }
+      );
     }
 
     res.status(201).json({

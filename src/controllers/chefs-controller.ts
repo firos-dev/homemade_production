@@ -100,42 +100,37 @@ const createChef = async (req: any, res: any, next: any) => {
         await unlinkAsync(certificate_file[0].path);
       }
     }
-    let userValues = keys.filter((value) => userUpdate.includes(value));
-    let chefValues = keys.filter((value) => chefCreate.includes(value));
     let locationValues = keys.filter((value) => locationUpdate.includes(value));
 
-    if (userValues.length) {
-      await Users.update(
-        { id: user_id },
-        {
-          first_name,
-          middle_name,
-          last_name,
-          full_name,
-          user_type: UserType.CHEF,
-        }
-      );
-    }
+    await Users.update(
+      { id: user_id },
+      {
+        first_name,
+        middle_name,
+        last_name,
+        full_name,
+        user_type: UserType.CHEF,
+      }
+    );
     let chef;
-    if (chefValues.length) {
-      chef = Chefs.create({
-        user_id,
-        bio,
-        image: imageUrl,
-        image_key: imageKey,
-        cuisine_id,
-        dietry_id,
-        spicy_level_id,
-        description,
-        terms_accepted,
-        drop_off_point_id,
-        status,
-        certificate_file: certificateUrl,
-        certificate_key: certificateKey,
-        certificate_number,
-      });
-      await chef.save();
-    }
+    chef = Chefs.create({
+      user_id,
+      bio,
+      image: imageUrl,
+      image_key: imageKey,
+      cuisine_id,
+      dietry_id,
+      spicy_level_id,
+      description,
+      terms_accepted,
+      drop_off_point_id,
+      status,
+      certificate_file: certificateUrl,
+      certificate_key: certificateKey,
+      certificate_number,
+    });
+    await chef.save();
+
     if (locationValues.length) {
       const location = Locations.create({
         user_id,
@@ -178,12 +173,13 @@ const getChefs = async (req: any, res: any, next: any) => {
     take: Number(perPage),
   };
 
-  let body = req.query;
+  let body = req.query || { user: null };
 
   if (body.page || body.perPage) {
     delete body.page;
     delete body.perPage;
   }
+  body.user.user_type = UserType.CHEF;
 
   let relations = [
     "user",
@@ -233,7 +229,7 @@ const updateChef = async (req: any, res: any, next: any) => {
     bio,
     email,
     mobile,
-    drop_off_point,
+    drop_off_point_id,
     certificate_number,
     status,
     verified,
@@ -253,7 +249,7 @@ const updateChef = async (req: any, res: any, next: any) => {
     "bio",
     "image",
     "image_key",
-    "drop_off_point",
+    "drop_off_point_id",
     "certificate_number",
     "certificate_file",
     "status",
@@ -326,7 +322,7 @@ const updateChef = async (req: any, res: any, next: any) => {
       let bdy: any = {
         bio,
         certificate_number,
-        drop_off_point,
+        drop_off_point_id,
         status,
         verified,
       };

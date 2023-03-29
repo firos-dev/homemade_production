@@ -30,6 +30,12 @@ export class Customers extends BaseEntity {
   image: String;
 
   @Column({
+    type: "text",
+    nullable: true,
+  })
+  image_key: String;
+
+  @Column({
     type: "enum",
     enum: Status,
     default: Status.INACTIVE,
