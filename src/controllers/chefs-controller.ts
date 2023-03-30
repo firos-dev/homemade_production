@@ -172,14 +172,19 @@ const getChefs = async (req: any, res: any, next: any) => {
     skip: Number(page) * Number(perPage),
     take: Number(perPage),
   };
+  let body: any = {
+    user: { user_type: UserType.CHEF },
+  };
 
-  let body = req.query || { user: null };
+  body = {
+    ...body,
+    ...req.query,
+  };
 
   if (body.page || body.perPage) {
     delete body.page;
     delete body.perPage;
   }
-  body.user.user_type = UserType.CHEF;
 
   let relations = [
     "user",

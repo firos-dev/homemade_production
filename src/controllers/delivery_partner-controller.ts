@@ -167,15 +167,21 @@ const getDeliveryPartners = async (req: any, res: any, next: any) => {
     skip: Number(page) * Number(perPage),
     take: Number(perPage),
   };
+  let body: any = {
+    user: { user_type: UserType.DELIVERY_PARTNER },
+  };
 
-  let body = req.query;
+  body = {
+    ...body,
+    ...req.query,
+  };
 
   if (body.page || body.perPage) {
     delete body.page;
     delete body.perPage;
   }
   try {
-    const chefs = await DeliveryPartners.find({
+    const delivery = await DeliveryPartners.find({
       where: body,
       ...offset,
       relations: ["user", "orders", "user.locations"],
@@ -183,7 +189,7 @@ const getDeliveryPartners = async (req: any, res: any, next: any) => {
     });
     res.status(200).json({
       status: 0,
-      data: chefs,
+      data: delivery,
     });
   } catch (error) {
     console.log(error);
@@ -328,7 +334,7 @@ const updateDeliveryPartner = async (req: any, res: any, next: any) => {
     "licence_number",
     "online",
     "verified",
-    "status"
+    "status",
   ];
 
   const isValidOperation = updates.every((update) =>

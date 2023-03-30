@@ -106,17 +106,19 @@ const getCustomers = async (req: any, res: any, next: any) => {
     skip: Number(page) * Number(perPage),
     take: Number(perPage),
   };
+  let body: any = {
+    user: { user_type: UserType.CUSTOMER },
+  };
 
-  let body = req.query || { user: null };
+  body = {
+    ...body,
+    ...req.query,
+  };
 
   if (body.page || body.perPage) {
     delete body.page;
     delete body.perPage;
   }
-  body = {
-    ...body,
-    user: { user_type: UserType.CUSTOMER },
-  };
   let relations = ["user", "user.locations"];
 
   if (req.body.includeFollowing) {
