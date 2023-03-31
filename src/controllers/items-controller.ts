@@ -128,10 +128,12 @@ const getItems = async (req: any, res: any, next: any) => {
     delete body.page;
     delete body.perPage;
   }
+  let relations = ["chef", "chef.user"];
   try {
     const items = await Items.find({
       where: body,
       ...offset,
+      relations,
       order: { created_at: "DESC" },
     });
     res.status(200).json({

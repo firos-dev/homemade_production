@@ -35,20 +35,6 @@ const createChef = async (req: any, res: any, next: any) => {
     country,
   } = req.body;
 
-  let userUpdate = ["first_name", "middle_name", "last_name", "full_name"];
-  let chefCreate = [
-    "bio",
-    "image",
-    "cuisine_id",
-    "dietry_id",
-    "spicy_level_id",
-    "description",
-    "terms_accepted",
-    "drop_off_point_id",
-    "certificate_file",
-    "certificate_number",
-    "status",
-  ];
   let locationUpdate = [
     "address_line_one",
     "address_line_two",
@@ -67,6 +53,24 @@ const createChef = async (req: any, res: any, next: any) => {
   let certificateKey, certificateUrl;
 
   try {
+    const chefData = await Chefs.findOne({
+      where: { user_id },
+    });
+
+    if (chefData) {
+      await Users.update(
+        { id: user_id },
+        {
+          user_type: UserType.CHEF,
+        }
+      );
+      res.status(201).json({
+        status: 0,
+        message: "Chef is already exist",
+        chefData,
+      });
+      return;
+    }
     const { image, certificate_file } = req.files;
 
     let imageUploaded = image && image !== "undefined";

@@ -1,4 +1,4 @@
-import { Followers } from './Followers';
+import { Followers } from "./Followers";
 import {
   Entity,
   BaseEntity,
@@ -50,7 +50,7 @@ export class Users extends BaseEntity {
   })
   customer_id: string;
 
-  @OneToOne(() => Chefs, (chef) => chef.user)
+  @OneToOne(() => Chefs, (chef) => chef.user, { cascade: true })
   @JoinColumn({
     name: "chef_id",
   })

@@ -14,7 +14,6 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from "typeorm";
-import { Roles } from "./Roles";
 import { Dietries } from "./Dietries";
 import { Locations } from "./Locations";
 import { Status } from "./../helpers/enums";
@@ -23,7 +22,7 @@ export class Chefs extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @OneToOne(() => Users, (user) => user.chef)
+  @OneToOne(() => Users, (user) => user.chef, { cascade: ["insert"] })
   @JoinColumn({ name: "user_id" })
   user: Users;
 
@@ -114,7 +113,7 @@ export class Chefs extends BaseEntity {
 
   @Column({
     type: "boolean",
-    default: false
+    default: false,
   })
   verified: Boolean;
 

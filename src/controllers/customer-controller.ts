@@ -43,6 +43,25 @@ const createCustomer = async (req: any, res: any, next: any) => {
   const keys = Object.keys(req.body);
 
   try {
+    const customerData = await Customers.findOne({
+      where: { user_id },
+    });
+
+    if (customerData) {
+      await Users.update(
+        { id: user_id },
+        {
+          user_type: UserType.CUSTOMER,
+        }
+      );
+      res.status(201).json({
+        status: 0,
+        message: "Customer is already exist",
+        customerData,
+      });
+      return;
+    }
+
     let locationValues = keys.filter((value) => locationUpdate.includes(value));
 
     await Users.update(

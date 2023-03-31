@@ -125,6 +125,47 @@ export const updateUserType = async (req: any, res: any, next: any) => {
   }
 };
 
+export const getUsers = async (req: any, res: any, next: any) => {
+  const page = req.query.page || null;
+
+  const perPage = req.query.perPage || null;
+
+  const offset = {
+    skip: Number(page) * Number(perPage),
+    take: Number(perPage),
+  };
+  let body:any = req.query
+
+  if (body.page || body.perPage) {
+    delete body.page;
+    delete body.perPage;
+  }
+
+  let relations = [
+    "chef",
+  ];
+
+  try {
+    const chefs = await Users.find({
+      where: body,
+      ...offset,
+      relations: relations,
+      order: { created_at: "DESC" },
+    });
+    res.status(200).json({
+      status: 0,
+      data: chefs,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.messages,
+    });
+  }
+};
+
 // export const generateRefreshToken = async (user: any) => {
 //   let secret : any
 //   secret = process.env.JWT_REFRESH_CODE

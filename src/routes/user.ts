@@ -1,4 +1,4 @@
-import { generateOTP, validateOtp } from "./../controllers/user-controller";
+import { generateOTP, getUsers, validateOtp } from "./../controllers/user-controller";
 import express from "express";
 import { Users } from "../modules/User";
 const router = express.Router();
@@ -207,6 +207,6 @@ router.post("/api/resend/otp", async (req, res) => {
 });
 
 router.patch("/api/user/type/:id", auth, updateUserType);
-// router.post(validate)
+router.get("/api/users", auth, getUsers);
 
 export { router as userRouter };
