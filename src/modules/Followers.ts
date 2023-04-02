@@ -1,6 +1,3 @@
-import { Orders } from "./Orders";
-import { SpicyLevels } from "./SpicyLevels";
-import { Cuisines } from "./Cuisines";
 import { Users } from "./User";
 import {
   Entity,

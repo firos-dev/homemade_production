@@ -6,6 +6,7 @@ import { Locations } from "../modules/Locations";
 import uploadFile from "../helpers/s3";
 import { promisify } from "util";
 import fs from "fs";
+import { Orders } from "../modules/Orders";
 const unlinkAsync = promisify(fs.unlink);
 
 const createDeliveryPartner = async (req: any, res: any, next: any) => {
@@ -167,9 +168,7 @@ const getDeliveryPartners = async (req: any, res: any, next: any) => {
     skip: Number(page) * Number(perPage),
     take: Number(perPage),
   };
-  let body: any = {
-    user: { user_type: UserType.DELIVERY_PARTNER },
-  };
+  let body: any = {};
 
   body = {
     ...body,

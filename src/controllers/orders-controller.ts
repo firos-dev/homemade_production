@@ -35,7 +35,6 @@ const createOrder = async (req: any, res: any, next: any) => {
       offer_amount,
       order_status: OrderStatus.CREATED,
       order_chef_status: OrderChefStatus.RECIEVED,
-      order_delivery_status: OrderDeliveryStatus.RECIEVED,
       delivery_location_id,
     });
 
@@ -140,4 +139,38 @@ const updateOrder = async (req: any, res: any, next: any) => {
   }
 };
 
-export default { createOrder, getOrders, updateOrder };
+const getCurrentOrder = async (req: any, res: any, next: any) => {
+  const { delivery_partner_id } = req.query;
+  try {
+    let whereClause = [
+      { delivery_partner_id, status: "Accepted" },
+      { delivery_partner_id, status: "Ready to pick" },
+      { delivery_partner_id, status: "Collected" },
+      { delivery_partner_id, status: "Ready to drop" },
+    ];
+    const delivery = await Orders.find({
+      where: whereClause,
+      relations: [
+        "items",
+        "user",
+        "delivery_location",
+        "chef",
+        "chef.drop_off_point",
+        "chef.user",
+      ],
+    });
+    res.status(200).json({
+      status: 0,
+      data: delivery,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.messages,
+    });
+  }
+};
+
+export default { createOrder, getOrders, updateOrder, getCurrentOrder };

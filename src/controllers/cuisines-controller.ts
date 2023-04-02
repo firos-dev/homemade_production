@@ -113,6 +113,7 @@ const getCuisineItems = async (req: any, res: any, next: any) => {
       return Promise.all(
         cuisines.map(async (cuisine) => {
           let [items, count] = await Items.findAndCount({
+            relations: ["chef"],
             where: { cuisine_id: cuisine.id },
             take: 2,
           });

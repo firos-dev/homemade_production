@@ -71,12 +71,14 @@ export class Orders extends BaseEntity {
   order_status: OrderStatus;
 
   @Column({
+    nullable: true,
     type: "enum",
     enum: OrderChefStatus,
   })
   order_chef_status: OrderChefStatus;
 
   @Column({
+    nullable: true,
     type: "enum",
     enum: OrderDeliveryStatus,
   })
@@ -98,6 +100,12 @@ export class Orders extends BaseEntity {
     nullable: true,
   })
   delivery_time: string;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  instructions: string;
 
   @Column({
     nullable: true,

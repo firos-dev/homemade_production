@@ -17,6 +17,7 @@ import {
 import { Dietries } from "./Dietries";
 import { Locations } from "./Locations";
 import { Status } from "./../helpers/enums";
+import { Reviews } from "./Reviews";
 @Entity("chefs")
 export class Chefs extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -135,6 +136,10 @@ export class Chefs extends BaseEntity {
     default: false,
   })
   terms_accepted: boolean;
+
+  @OneToMany(() => Reviews,
+  (reviews) => reviews.chef, {cascade: true,})
+  reviews: Reviews[]
 
   @CreateDateColumn()
   created_at: Date;

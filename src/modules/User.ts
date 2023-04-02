@@ -21,6 +21,7 @@ import { Locations } from "./Locations";
 import { Orders } from "./Orders";
 import { Cart } from "./Cart";
 import { UserType } from "../helpers/enums";
+import { Reviews } from "./Reviews";
 @Entity("users")
 export class Users extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -38,7 +39,7 @@ export class Users extends BaseEntity {
   })
   role_id: string;
 
-  @OneToOne(() => Customers, (customer) => customer.user)
+  @OneToOne(() => Customers, (customer) => customer.user, { cascade: true })
   @JoinColumn({
     name: "customer_id",
   })

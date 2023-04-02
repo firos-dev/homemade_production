@@ -8,10 +8,12 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from "typeorm";
 
 import { Chefs } from "./Chefs";
 import { Cuisines } from "./Cuisines";
+import { Reviews } from "./Reviews";
 
 @Entity("items")
 export class Items extends BaseEntity {
@@ -104,6 +106,10 @@ export class Items extends BaseEntity {
     enum: Status,
   })
   status: Status;
+
+  @OneToMany(() => Reviews,
+  (reviews) => reviews.item, {cascade: true,})
+  reviews: Reviews[]
 
   @CreateDateColumn()
   created_at: Date;

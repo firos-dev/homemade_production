@@ -18,6 +18,7 @@ import { Roles } from "./Roles";
 import { Dietries } from "./Dietries";
 import { Locations } from "./Locations";
 import { Status } from "./../helpers/enums";
+import { Reviews } from "./Reviews";
 @Entity("delivery_partners")
 export class DeliveryPartners extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -98,6 +99,10 @@ export class DeliveryPartners extends BaseEntity {
     default: Status.INACTIVE,
   })
   status: Status;
+  
+  @OneToMany(() => Reviews,
+  (reviews) => reviews.delivery_partner, {cascade: true,})
+  reviews: Reviews[]
 
   @CreateDateColumn()
   created_at: Date;

@@ -152,7 +152,6 @@ const getItems = async (req: any, res: any, next: any) => {
 
 const updateItem = async (req: any, res: any, next: any) => {
   const { id } = req.params;
-  let file = req.file;
   let imageKey, imageUrl;
   let image2Key, image2Url;
   try {

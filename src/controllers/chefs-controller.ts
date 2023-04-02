@@ -176,9 +176,7 @@ const getChefs = async (req: any, res: any, next: any) => {
     skip: Number(page) * Number(perPage),
     take: Number(perPage),
   };
-  let body: any = {
-    user: { user_type: UserType.CHEF },
-  };
+  let body: any = {};
 
   body = {
     ...body,

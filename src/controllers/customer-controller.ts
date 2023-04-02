@@ -125,9 +125,7 @@ const getCustomers = async (req: any, res: any, next: any) => {
     skip: Number(page) * Number(perPage),
     take: Number(perPage),
   };
-  let body: any = {
-    user: { user_type: UserType.CUSTOMER },
-  };
+  let body: any = {};
 
   body = {
     ...body,
