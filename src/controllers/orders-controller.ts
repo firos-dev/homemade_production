@@ -142,11 +142,11 @@ const updateOrder = async (req: any, res: any, next: any) => {
 const getCurrentOrder = async (req: any, res: any, next: any) => {
   const { delivery_partner_id } = req.query;
   try {
-    let whereClause = [
-      { delivery_partner_id, status: "Accepted" },
-      { delivery_partner_id, status: "Ready to pick" },
-      { delivery_partner_id, status: "Collected" },
-      { delivery_partner_id, status: "Ready to drop" },
+    let whereClause: any = [
+      { delivery_partner_id, order_delivery_status: "Accepted" },
+      { delivery_partner_id, order_delivery_status: "Ready to pick" },
+      { delivery_partner_id, order_delivery_status: "Collected" },
+      { delivery_partner_id, order_delivery_status: "Ready to drop" },
     ];
     const delivery = await Orders.find({
       where: whereClause,
