@@ -93,7 +93,7 @@ const getOrders = async (req: any, res: any, next: any) => {
   }
 
   try {
-    const orders = await Orders.find({
+    let orders: any = await Orders.find({
       where: { ...where },
       ...offset,
       relations: [
@@ -105,6 +105,19 @@ const getOrders = async (req: any, res: any, next: any) => {
         "chef.user",
       ],
       order: { created_at: "DESC" },
+    });
+    orders = orders.map((order: any) => {
+      return {
+        ...order,
+        payments: [
+          {
+            amount: "3423.00",
+            date: "2023-04-15",
+            time: "13:25:00",
+            payment_method: "Card",
+          },
+        ],
+      };
     });
     res.status(200).json({
       status: 0,
@@ -173,4 +186,28 @@ const getCurrentOrder = async (req: any, res: any, next: any) => {
   }
 };
 
-export default { createOrder, getOrders, updateOrder, getCurrentOrder };
+const getDeliveriesCount = async (req: any, res: any, next: any) => {
+  try {
+    res.status(200).json({
+      status: 0,
+      data: {
+        count: 70,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.messages,
+    });
+  }
+};
+
+export default {
+  createOrder,
+  getOrders,
+  updateOrder,
+  getCurrentOrder,
+  getDeliveriesCount,
+};

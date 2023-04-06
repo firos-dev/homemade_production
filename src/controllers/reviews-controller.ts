@@ -76,5 +76,22 @@ const getReviews = async (req: any, res: any, next: any) => {
     });
   }
 };
+const getAvrageRating = async (req: any, res: any, next: any) => {
+  try {
+    res.status(200).json({
+      status: 0,
+      data: {
+        rating: 4.5,
+      },
+    });
+  } catch (error) {
+    console.log(error);
 
-export default {addReview, getReviews}
+    res.status(400).json({
+      status: 1,
+      message: error.messages,
+    });
+  }
+};
+
+export default {addReview, getReviews, getAvrageRating}

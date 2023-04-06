@@ -24,6 +24,11 @@ export class Orders extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
+  @Column({
+    default: "OD12354"
+  })
+  order_ref_id: String;
+
   @ManyToOne(() => Users, (user) => user.orders)
   @JoinColumn({ name: "user_id" })
   user: Users;
