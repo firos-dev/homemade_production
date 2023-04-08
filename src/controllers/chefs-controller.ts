@@ -400,6 +400,7 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("chefs.availability", "availability")
       .leftJoinAndSelect("chefs.reviews", "reviews")
       .leftJoinAndSelect("chefs.items", "items")
+      .leftJoinAndSelect("items.reviews", "item_reviews")
       .where(`availability.${day} = ${true}`)
       .getMany();
     // res.status(201).json({
