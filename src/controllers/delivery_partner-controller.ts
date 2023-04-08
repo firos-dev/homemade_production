@@ -183,7 +183,7 @@ const getDeliveryPartners = async (req: any, res: any, next: any) => {
     const delivery = await DeliveryPartners.find({
       where: body,
       ...offset,
-      relations: ["user", "orders", "user.locations"],
+      relations: ["user", "orders", "user.locations", "reviews"],
       order: { created_at: "DESC" },
     });
     res.status(200).json({

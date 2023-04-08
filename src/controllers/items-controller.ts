@@ -128,7 +128,7 @@ const getItems = async (req: any, res: any, next: any) => {
     delete body.page;
     delete body.perPage;
   }
-  let relations = ["chef", "chef.user"];
+  let relations = ["chef", "chef.user", "reviews"];
   try {
     const items = await Items.find({
       where: body,

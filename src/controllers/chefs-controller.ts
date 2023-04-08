@@ -197,6 +197,7 @@ const getChefs = async (req: any, res: any, next: any) => {
     "user.locations",
     "drop_off_point",
     "availability",
+    "reviews"
   ];
 
   if (body.includeFollowing) {
@@ -397,6 +398,7 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("chefs.dietry", "dietry")
       .leftJoinAndSelect("chefs.drop_off_point", "drop_off_point")
       .leftJoinAndSelect("chefs.availability", "availability")
+      .leftJoinAndSelect("chefs.reviews", "reviews")
       .where(`availability.${day} = ${true}`)
       .getMany();
     // res.status(201).json({
