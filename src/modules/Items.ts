@@ -25,7 +25,7 @@ export class Items extends BaseEntity {
   })
   name: string;
 
-  @ManyToOne(() => Chefs)
+  @ManyToOne(() => Chefs, (chef) => chef.items)
   @JoinColumn({
     name: "chef_id",
   })
@@ -107,9 +107,8 @@ export class Items extends BaseEntity {
   })
   status: Status;
 
-  @OneToMany(() => Reviews,
-  (reviews) => reviews.item, {cascade: true,})
-  reviews: Reviews[]
+  @OneToMany(() => Reviews, (reviews) => reviews.item, { cascade: true })
+  reviews: Reviews[];
 
   @CreateDateColumn()
   created_at: Date;

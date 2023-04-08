@@ -19,6 +19,7 @@ import { Locations } from "./Locations";
 import { Status } from "./../helpers/enums";
 import { Reviews } from "./Reviews";
 import { Availabilities } from "./Availabilities";
+import { Items } from "./Items";
 @Entity("chefs")
 export class Chefs extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -128,6 +129,9 @@ export class Chefs extends BaseEntity {
     default: Status.INACTIVE,
   })
   status: Status;
+
+  @OneToMany(() => Items, (item) => item.chef)
+  items: Items[];
 
   @Column({
     type: "text",
