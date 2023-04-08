@@ -18,6 +18,7 @@ import { Dietries } from "./Dietries";
 import { Locations } from "./Locations";
 import { Status } from "./../helpers/enums";
 import { Reviews } from "./Reviews";
+import { Availabilities } from "./Availabilities";
 @Entity("chefs")
 export class Chefs extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -47,6 +48,9 @@ export class Chefs extends BaseEntity {
     name: "cuisine_id",
   })
   cuisine: Cuisines;
+
+  @OneToOne(() => Availabilities, (avail) => avail.chef)
+  availability: Availabilities;
 
   @Column({
     type: "text",
@@ -137,9 +141,8 @@ export class Chefs extends BaseEntity {
   })
   terms_accepted: boolean;
 
-  @OneToMany(() => Reviews,
-  (reviews) => reviews.chef, {cascade: true,})
-  reviews: Reviews[]
+  @OneToMany(() => Reviews, (reviews) => reviews.chef, { cascade: true })
+  reviews: Reviews[];
 
   @CreateDateColumn()
   created_at: Date;

@@ -1,11 +1,12 @@
+import { Locations } from "./../modules/Locations";
 import { UserType } from "./../helpers/enums";
 import { AddressType } from "../helpers/enums";
-import { Locations } from "../modules/Locations";
 import { Users } from "../modules/User";
 import { Chefs } from "./../modules/Chefs";
 import uploadFile from "../helpers/s3";
 import { promisify } from "util";
 import fs from "fs";
+import { AppDataSource } from "../";
 const unlinkAsync = promisify(fs.unlink);
 
 const createChef = async (req: any, res: any, next: any) => {
@@ -195,20 +196,30 @@ const getChefs = async (req: any, res: any, next: any) => {
     "dietry",
     "user.locations",
     "drop_off_point",
+    "availability",
   ];
 
-  if (req.body.includeFollowing) {
+  if (body.includeFollowing) {
     relations.push("user.following");
   }
-  if (req.body.includeFollowers) {
+  if (body.includeFollowers) {
     relations.push("user.followers");
   }
+  if (body.day) {
+    body = {
+      ...body,
+      [`availability.${body.day}`]: true,
+    };
+    delete body.day;
+  }
+
+  console.log(body);
 
   try {
     const chefs = await Chefs.find({
-      where: body,
-      ...offset,
       relations: relations,
+      ...offset,
+      where: body,
       order: { created_at: "DESC" },
     });
     res.status(200).json({
@@ -358,4 +369,95 @@ const updateChef = async (req: any, res: any, next: any) => {
   }
 };
 
-export default { createChef, getChefs, updateChef };
+const getChefBydateDistance = async (req: any, res: any, next: any) => {
+  const { latitude, longitude, day } = req.query;
+  let relations = [
+    "user",
+    "cuisine",
+    "spicy_level",
+    "dietry",
+    "user.locations",
+    "drop_off_point",
+    "availability",
+  ];
+
+  if (req.body.includeFollowing) {
+    relations.push("user.following");
+  }
+  if (req.body.includeFollowers) {
+    relations.push("user.followers");
+  }
+
+  try {
+    let chefs: any = await AppDataSource.getRepository(Chefs)
+      .createQueryBuilder("chefs")
+      .leftJoinAndSelect("chefs.user", "user")
+      .leftJoinAndSelect("chefs.cuisine", "cuisine")
+      .leftJoinAndSelect("chefs.spicy_level", "spicy_level")
+      .leftJoinAndSelect("chefs.dietry", "dietry")
+      .leftJoinAndSelect("chefs.drop_off_point", "drop_off_point")
+      .leftJoinAndSelect("chefs.availability", "availability")
+      .where(`availability.${day} = ${true}`)
+      .getMany();
+    // res.status(201).json({
+    //   status: 0,
+    //   data: chefs,
+    // });
+    // return;
+    chefs = chefs
+      ?.filter((a: any) => a.drop_off_point)
+      .map((chef: any) => {
+        return {
+          ...chef,
+          lat: chef.drop_off_point.latitude,
+          long: chef.drop_off_point.longitude,
+        };
+      });
+
+    if (!chefs.length) {
+      res.status(200).json({
+        status: 0,
+        data: [],
+      });
+    }
+
+    const sortedData = sortByNearest(latitude, longitude, chefs);
+
+    res.status(200).json({
+      status: 0,
+      data: sortedData,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.message,
+    });
+  }
+};
+
+function sortByNearest(lat: any, long: any, data: any) {
+  const EARTH_RADIUS_KM = 6371; // Earth's radius in kilometers
+  const sortedData = data
+    .map((item: any) => {
+      const dLat = deg2rad(item.lat - lat);
+      const dLong = deg2rad(item.long - long);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat)) *
+          Math.cos(deg2rad(item.lat)) *
+          Math.sin(dLong / 2) *
+          Math.sin(dLong / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = EARTH_RADIUS_KM * c;
+      return { ...item, distance };
+    })
+    .sort((a: any, b: any) => a.distance - b.distance);
+  return sortedData;
+}
+function deg2rad(degrees: any) {
+  return (degrees * Math.PI) / 180;
+}
+
+export default { createChef, getChefs, updateChef, getChefBydateDistance };

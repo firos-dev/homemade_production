@@ -21,7 +21,7 @@ export class Availabilities extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @ManyToOne(() => Chefs)
+  @OneToOne(() => Chefs, (chef) => chef.availability)
   @JoinColumn({ name: "chef_id" })
   chef: Chefs;
 

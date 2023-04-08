@@ -41,4 +41,5 @@ var upload = multer({ storage: storage }).fields([
 router.post("/api/chef", auth, upload, chefsController.createChef);
 router.get("/api/chefs", auth, chefsController.getChefs);
 router.patch("/api/chef/:id", auth, upload, chefsController.updateChef);
+router.get("/api/chef/day/distance", auth, upload, chefsController.getChefBydateDistance);
 export { router as chefsRouter };
