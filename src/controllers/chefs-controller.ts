@@ -198,6 +198,8 @@ const getChefs = async (req: any, res: any, next: any) => {
     "drop_off_point",
     "availability",
     "reviews",
+    "items",
+    "items.reviews",
   ];
 
   if (body.includeFollowing) {
@@ -214,14 +216,38 @@ const getChefs = async (req: any, res: any, next: any) => {
     delete body.day;
   }
 
-  console.log(body);
-
   try {
-    const chefs = await Chefs.find({
+    let chefs = await Chefs.find({
       relations: relations,
       ...offset,
       where: body,
       order: { created_at: "DESC" },
+    });
+
+    chefs = chefs.map((chef: any) => {
+      let chefStars: any = [];
+      let items = chef.items.map((item: any) => {
+        let totalReviews = item.reviews.length;
+        let reviewSum = item.reviews.reduce(
+          (a: any, b: any) => a + Number(b.star_count),
+          0
+        );
+        let itemStar = reviewSum / totalReviews;
+        chefStars.push(itemStar);
+        return {
+          ...item,
+          item_star: (itemStar).toFixed(2),
+        };
+      });
+      let reviewsCount = chef.items.length;
+
+      let chefStarSum = chefStars.reduce((a: any, b: any) => a + Number(b), 0);
+      let chefStar = chefStarSum / reviewsCount;
+      return {
+        ...chef,
+        chef_star: (chefStar).toFixed(2),
+        items,
+      };
     });
     res.status(200).json({
       status: 0,
@@ -403,11 +429,35 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("items.reviews", "item_reviews")
       .where(`availability.${day} = ${true}`)
       .getMany();
-    // res.status(201).json({
-    //   status: 0,
-    //   data: chefs,
-    // });
-    // return;
+
+    chefs = chefs.map((chef: any) => {
+      let chefStars: any = [];
+      let items = chef.items.map((item: any) => {
+        let totalReviews = item.reviews.length;
+        let reviewSum = item.reviews.reduce(
+          (a: any, b: any) => a + Number(b.star_count),
+          0
+        );
+        let itemStar = reviewSum / totalReviews;
+        chefStars.push(itemStar);
+        return {
+          ...item,
+          item_star: (itemStar).toFixed(2),
+        };
+      });
+      let reviewsCount = chef.items.length;
+      console.log(chefStars);
+      console.log(reviewsCount);
+
+      let chefStarSum = chefStars.reduce((a: any, b: any) => a + Number(b), 0);
+      let chefStar = chefStarSum / reviewsCount;
+      return {
+        ...chef,
+        chef_star: (chefStar).toFixed(2),
+        items,
+      };
+    });
+
     chefs = chefs
       ?.filter((a: any) => a.drop_off_point)
       .map((chef: any) => {

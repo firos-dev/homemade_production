@@ -78,8 +78,7 @@ export class Reviews extends BaseEntity {
   delivery_review: string;
 
   @Column({
-    type: "numeric",
-    nullable: true,
+    type: "numeric"
   })
   star_count: string;
 
