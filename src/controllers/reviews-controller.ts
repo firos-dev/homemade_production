@@ -9,6 +9,7 @@ const addReview = async (req: any, res: any, next: any) => {
     item_review,
     chef_review,
     delivery_review,
+    star_count
   } = req.body;
   try {
     if (!reviewed_id) {
@@ -22,6 +23,7 @@ const addReview = async (req: any, res: any, next: any) => {
       item_review,
       chef_review,
       delivery_review,
+      star_count
     });
 
     await review.save();
