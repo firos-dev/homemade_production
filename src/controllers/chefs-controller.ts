@@ -7,6 +7,7 @@ import uploadFile from "../helpers/s3";
 import { promisify } from "util";
 import fs from "fs";
 import { AppDataSource } from "../";
+import { OrderChefStatus } from "./../helpers/enums";
 const unlinkAsync = promisify(fs.unlink);
 
 const createChef = async (req: any, res: any, next: any) => {
@@ -225,6 +226,10 @@ const getChefs = async (req: any, res: any, next: any) => {
     });
 
     chefs = chefs.map((chef: any) => {
+      let completed = chef.orders.filter(
+        (order: any) => order.order_chef_status === OrderChefStatus.COMPLETED
+      );
+
       let chefStars: any = [];
       let items = chef.items.map((item: any) => {
         let totalReviews = item.reviews.length;
@@ -236,7 +241,8 @@ const getChefs = async (req: any, res: any, next: any) => {
         chefStars.push(itemStar);
         return {
           ...item,
-          item_star: (itemStar).toFixed(2),
+          item_star: itemStar.toFixed(1),
+          item_reviews: totalReviews,
         };
       });
       let reviewsCount = chef.items.length;
@@ -245,8 +251,10 @@ const getChefs = async (req: any, res: any, next: any) => {
       let chefStar = chefStarSum / reviewsCount;
       return {
         ...chef,
-        chef_star: (chefStar).toFixed(2),
+        chef_star: chefStar.toFixed(2),
+        chef_reviews: reviewsCount,
         items,
+        deliveries: completed.length,
       };
     });
     res.status(200).json({
@@ -425,12 +433,16 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("chefs.drop_off_point", "drop_off_point")
       .leftJoinAndSelect("chefs.availability", "availability")
       .leftJoinAndSelect("chefs.reviews", "reviews")
+      .leftJoinAndSelect("chefs.orders", "orders")
       .leftJoinAndSelect("chefs.items", "items")
       .leftJoinAndSelect("items.reviews", "item_reviews")
       .where(`availability.${day} = ${true}`)
       .getMany();
 
     chefs = chefs.map((chef: any) => {
+      let completed = chef.orders.filter(
+        (order: any) => order.order_chef_status === OrderChefStatus.COMPLETED
+      );
       let chefStars: any = [];
       let items = chef.items.map((item: any) => {
         let totalReviews = item.reviews.length;
@@ -442,19 +454,20 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
         chefStars.push(itemStar);
         return {
           ...item,
-          item_star: (itemStar).toFixed(2),
+          item_star: itemStar.toFixed(2),
+          item_reviews: totalReviews,
         };
       });
       let reviewsCount = chef.items.length;
-      console.log(chefStars);
-      console.log(reviewsCount);
 
       let chefStarSum = chefStars.reduce((a: any, b: any) => a + Number(b), 0);
       let chefStar = chefStarSum / reviewsCount;
       return {
         ...chef,
-        chef_star: (chefStar).toFixed(2),
+        chef_star: chefStar.toFixed(2),
+        chef_reviews: reviewsCount,
         items,
+        deliveries: completed.length,
       };
     });
 

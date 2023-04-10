@@ -130,12 +130,27 @@ const getItems = async (req: any, res: any, next: any) => {
   }
   let relations = ["chef", "chef.user", "reviews", "chef.reviews"];
   try {
-    const items = await Items.find({
+    let items = await Items.find({
       where: body,
       ...offset,
       relations,
       order: { created_at: "DESC" },
     });
+
+    items = items.map((item: any) => {
+      let totalReviews = item.reviews.length;
+      let reviewSum = item.reviews.reduce(
+        (a: any, b: any) => a + Number(b.star_count),
+        0
+      );
+      let itemStar = reviewSum / totalReviews;
+      return {
+        ...item,
+        item_star: itemStar ? itemStar.toFixed(1) : 0,
+        item_reviews: totalReviews,
+      };
+    });
+
     res.status(200).json({
       status: 0,
       data: items,
