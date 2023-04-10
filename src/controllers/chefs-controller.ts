@@ -201,6 +201,7 @@ const getChefs = async (req: any, res: any, next: any) => {
     "reviews",
     "items",
     "items.reviews",
+    "orders",
   ];
 
   if (body.includeFollowing) {
@@ -241,7 +242,7 @@ const getChefs = async (req: any, res: any, next: any) => {
         chefStars.push(itemStar);
         return {
           ...item,
-          item_star: itemStar.toFixed(1),
+          item_star: itemStar ? itemStar.toFixed(1) : "0",
           item_reviews: totalReviews,
         };
       });
@@ -251,7 +252,7 @@ const getChefs = async (req: any, res: any, next: any) => {
       let chefStar = chefStarSum / reviewsCount;
       return {
         ...chef,
-        chef_star: chefStar.toFixed(2),
+        chef_star: chefStar ? chefStar.toFixed(2) : "0",
         chef_reviews: reviewsCount,
         items,
         deliveries: completed.length,
@@ -454,7 +455,7 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
         chefStars.push(itemStar);
         return {
           ...item,
-          item_star: itemStar.toFixed(2),
+          item_star: itemStar ? itemStar.toFixed(2) : "0",
           item_reviews: totalReviews,
         };
       });
@@ -464,7 +465,7 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       let chefStar = chefStarSum / reviewsCount;
       return {
         ...chef,
-        chef_star: chefStar.toFixed(2),
+        chef_star: chefStar ? chefStar.toFixed(2) : "0",
         chef_reviews: reviewsCount,
         items,
         deliveries: completed.length,

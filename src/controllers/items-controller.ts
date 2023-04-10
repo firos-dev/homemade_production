@@ -146,7 +146,7 @@ const getItems = async (req: any, res: any, next: any) => {
       let itemStar = reviewSum / totalReviews;
       return {
         ...item,
-        item_star: itemStar ? itemStar.toFixed(1) : 0,
+        item_star: itemStar ? itemStar.toFixed(1) : "0",
         item_reviews: totalReviews,
       };
     });
