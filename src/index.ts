@@ -129,9 +129,7 @@ export const AppDataSource = new DataSource({
   });
 
   io.on("connection", (socket) => {
-    console.log("a user connected");
     socket.on("live_location", (...args) => {
-      console.log(args);
       io.emit("live_to_cutomer", args);
     });
   });

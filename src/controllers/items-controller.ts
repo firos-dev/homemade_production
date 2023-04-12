@@ -167,59 +167,67 @@ const getItems = async (req: any, res: any, next: any) => {
 
 const updateItem = async (req: any, res: any, next: any) => {
   const { id } = req.params;
-  let imageKey, imageUrl;
-  let image2Key, image2Url;
   try {
-    const { image, image2 } = req.files;
     let item: any = await Items.findOne({ where: { id } });
+    const imageArr = req.files;
+    let images: any = [];
+    let imageKeys: any = [];
 
-    let imageUploaded = image && image !== "undefined";
-
-    let image2Uploaded = image2 && image2 !== "undefined";
-
-    if (imageUploaded || image2Uploaded) {
-      if (imageUploaded) {
-        let imageResult = await uploadFile(
-          image[0],
-          `${item.chef_id}/items/` + image[0].filename
-        );
-
-        if (imageResult) {
-          imageKey = imageResult.Key;
-          imageUrl = imageResult.Location;
-        }
-        await unlinkAsync(image[0].path);
-      }
-      if (image2Uploaded) {
-        let image2Result = await uploadFile(
-          image2[0],
-          `${item.chef_id}/items/` + image2[0].filename
-        );
-
-        if (image2Result) {
-          image2Key = image2Result.Key;
-          image2Url = image2Result.Location;
-        }
-        await unlinkAsync(image2[0].path);
-      }
+    if (imageArr.length > 0) {
+      await Promise.all(
+        imageArr.map(async (image: any) => {
+          let imageResult = await uploadFile(
+            image,
+            `${item.chef_id}/items/` + image.filename
+          );
+          images.push(imageResult.Location);
+          imageKeys.push(imageResult.Key);
+          await unlinkAsync(image.path);
+        })
+      );
     }
+
     let body = {
       ...req.body,
     };
-    if (image) {
-      body.image = imageUrl;
-      body.image_key = imageKey;
+    
+    let updated_images: any;
+    let updated_image_keys: any;
+    if (body?.deleted_images) {
+      let deleted_images = JSON.parse(body.deleted_images);
+      
+      deleted_images.map((index: any) => {
+        updated_images = item.images
+        updated_image_keys = item.image_keys
+        updated_images.splice(index, 1);
+        updated_image_keys.splice(index, 1);
+      });
+      delete body.deleted_images;
     }
-    if (image2) {
-      body.image2 = image2Url;
-      body.image2_key = image2Key;
+
+
+    if (images?.length) {
+      updated_images = [...updated_images, ...images];
+      updated_image_keys = [...updated_image_keys, ...imageKeys];
     }
-    await Items.update({ id }, { ...req.body });
+
+    if (updated_images?.length) {
+      body.images = updated_images;
+      body.image_keys = updated_image_keys;
+    }
+
+    if (body?.images?.length > 7) {
+      throw new Error("Image file count exceeded");
+    }
+
+    await Items.update({ id }, { ...body });
     res.status(201).json({
       status: 0,
       message: "Record has been successfully updated",
     });
   } catch (error) {
+    console.log(error);
+    
     res.status(400).json({
       status: 1,
       message: error.message,

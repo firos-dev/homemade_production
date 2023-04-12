@@ -175,7 +175,6 @@ const updateCustomer = async (req: any, res: any, next: any) => {
     email,
     mobile,
     user_type,
-    image,
     terms_accepted,
   } = req.body;
 
@@ -201,15 +200,15 @@ const updateCustomer = async (req: any, res: any, next: any) => {
     let imageUploaded = image && image !== "undefined";
     if (imageUploaded) {
       let imageResult = await uploadFile(
-        image[0],
-        `${customer.user_id}/avatars/` + image[0].filename
+        image,
+        `${customer.user_id}/avatars/` + image.filename
       );
 
       if (imageResult) {
         imageKey = imageResult.Key;
         imageUrl = imageResult.Location;
       }
-      await unlinkAsync(image[0].path);
+      await unlinkAsync(image.path);
     }
 
     let userValues = keys.filter((value) => userUpdate.includes(value));

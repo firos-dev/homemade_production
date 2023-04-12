@@ -103,6 +103,7 @@ const getOrders = async (req: any, res: any, next: any) => {
         "chef",
         "chef.drop_off_point",
         "chef.user",
+        "logs"
       ],
       order: { created_at: "DESC" },
     });
@@ -170,6 +171,7 @@ const getCurrentOrder = async (req: any, res: any, next: any) => {
         "chef",
         "chef.drop_off_point",
         "chef.user",
+        "logs"
       ],
     });
     res.status(200).json({

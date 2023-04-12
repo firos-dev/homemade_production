@@ -93,5 +93,5 @@ const upload = (req: any, res: any, next: any) => {
 
 router.post("/api/item", auth, upload, itemsController.createItem);
 router.get("/api/items", auth, itemsController.getItems);
-router.patch("/api/item/:id", upload, auth, itemsController.updateItem);
+router.patch("/api/item/:id", auth, upload, itemsController.updateItem);
 export { router as itemsRouter };
