@@ -7,6 +7,7 @@ import {
 } from "../helpers/enums";
 import { OrderItems } from "../modules/OrderItems";
 import { Between } from "typeorm";
+import { io } from "./../index";
 
 const createOrder = async (req: any, res: any, next: any) => {
   const {
@@ -52,7 +53,7 @@ const createOrder = async (req: any, res: any, next: any) => {
         .values(orderItems)
         .execute();
     });
-
+    io.emit("create_order", { data: order });
     res.status(201).json({
       status: 0,
       message: "Record has been successfully saved",
@@ -103,7 +104,7 @@ const getOrders = async (req: any, res: any, next: any) => {
         "chef",
         "chef.drop_off_point",
         "chef.user",
-        "logs"
+        "logs",
       ],
       order: { created_at: "DESC" },
     });
@@ -171,7 +172,7 @@ const getCurrentOrder = async (req: any, res: any, next: any) => {
         "chef",
         "chef.drop_off_point",
         "chef.user",
-        "logs"
+        "logs",
       ],
     });
     res.status(200).json({
