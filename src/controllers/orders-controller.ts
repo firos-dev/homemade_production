@@ -138,8 +138,15 @@ const getOrders = async (req: any, res: any, next: any) => {
 const updateOrder = async (req: any, res: any, next: any) => {
   const { id } = req.params;
   try {
-    await Orders.update({ id }, req.body);
-
+    const updateResult = await AppDataSource.getRepository(Orders)
+      .createQueryBuilder()
+      .update(Orders)
+      .set(req.body)
+      .where("id = :id", { id })
+      .returning("*") // '*' means all columns of the updated rows
+      .execute();
+    let updatedRows = updateResult.raw;
+    io.emit("order_updated", { order: updatedRows });
     res.status(200).json({
       status: 0,
       message: "Record has been succefully updated",

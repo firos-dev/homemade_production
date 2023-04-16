@@ -92,7 +92,7 @@ router.post("/api/login", async (req, res) => {
     const { username, password } = req.body;
     await findUserByCred(username, password)
       .then(async (user: any) => {
-        let token = await generateToken(user);
+        let token = await generateToken(user, null);
         let userData = {
           id: user.id,
           first_name: user.first_name,
@@ -149,11 +149,11 @@ router.post("/api/mobile/login", async (req, res) => {
 });
 
 router.post("/api/validate/otp", async (req, res) => {
-  const { user_id, otp } = req.body;
+  const { user_id, otp, firebase_token } = req.body;
 
   try {
     await validateOtp(user_id, otp).then(async (user) => {
-      let token = await generateToken(user);
+      let token = await generateToken(user, firebase_token);
       res.status(200).json({
         status: 1,
         user: {

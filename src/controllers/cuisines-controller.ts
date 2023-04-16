@@ -84,6 +84,10 @@ const getCuisines = async (req: any, res: any, next: any) => {
     delete body.perPage;
   }
   try {
+    body = {
+      ...body,
+      status: Status.ACTIVE,
+    };
     const cuisines = await Cuisines.find({
       where: body,
       ...offset,
@@ -113,8 +117,8 @@ const getCuisineItems = async (req: any, res: any, next: any) => {
       return Promise.all(
         cuisines.map(async (cuisine) => {
           let [items, count] = await Items.findAndCount({
-            relations: ["chef"],
-            where: { cuisine_id: cuisine.id },
+            relations: ["chef", "chef.user"],
+            where: { cuisine_id: cuisine.id, status: Status.ACTIVE },
             take: 2,
           });
           cuisineData.push({
@@ -140,4 +144,81 @@ const getCuisineItems = async (req: any, res: any, next: any) => {
   }
 };
 
-export default { createCuisine, getCuisines, getCuisineItems };
+const updateCuisine = async (req: any, res: any, next: any) => {
+  const { id } = req.params;
+  let imageKey, imageUrl;
+  let iconKey, iconUrl;
+  try {
+    let body: any = {
+      ...req.body,
+    };
+
+    let image, icon
+    if (req.files) {
+      image = req.files.image;
+      icon = req.files.icon;
+    }
+
+    let imageUploaded = image && image !== "undefined";
+
+    let iconUploaded = icon && icon !== "undefined";
+
+    if (imageUploaded || iconUploaded) {
+      if (imageUploaded) {
+        let imageResult = await uploadFile(
+          image[0],
+          `cuisines/images` + image[0].filename
+        );
+
+        if (imageResult) {
+          imageKey = imageResult.Key;
+          imageUrl = imageResult.Location;
+        }
+        await unlinkAsync(image[0].path);
+      }
+      if (iconUploaded) {
+        let iconResult = await uploadFile(
+          icon[0],
+          `cuisines/icons/` + icon[0].filename
+        );
+
+        if (iconResult) {
+          iconKey = iconResult.Key;
+          iconUrl = iconResult.Location;
+        }
+        await unlinkAsync(icon[0].path);
+      }
+    }
+    if (image) {
+      body = {
+        ...body,
+        image: imageUrl,
+        image_key: imageKey,
+      };
+    }
+
+    if (icon) {
+      body = {
+        ...body,
+        icon: iconUrl,
+        icon_key: iconKey,
+      };
+    }
+    console.log(body);
+    
+    await Cuisines.update({ id }, { ...body });
+    res.status(201).json({
+      status: 0,
+      message: "Record has been successfully updated",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 0,
+      message: error.message,
+    });
+  }
+};
+
+export default { createCuisine, getCuisines, getCuisineItems, updateCuisine };

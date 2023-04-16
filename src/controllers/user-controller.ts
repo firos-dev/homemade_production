@@ -23,7 +23,8 @@ export const findUserByCred = async (username: string, password: string) => {
   });
 };
 
-export const generateToken = async (user: any) => {
+export const generateToken = async (user: any, firebase_token: any) => {
+  await Users.update({ id: user.id }, { firebase_token });
   let secret: any;
   secret = process.env.JWT_SECRET_CODE;
   const token = jwt.sign({ user_id: user.id.toString() }, secret);

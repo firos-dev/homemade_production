@@ -131,6 +131,11 @@ export class Users extends BaseEntity {
   })
   user_type: UserType;
 
+  @Column({
+    nullable: true,
+  })
+  firebase_token: string;
+
   @CreateDateColumn()
   created_at: Date;
 

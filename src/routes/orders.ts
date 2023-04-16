@@ -2,6 +2,9 @@ import express from "express";
 import auth from "../middleware/auth";
 const router = express.Router();
 import ordersController from "../controllers/orders-controller";
+import {connectedUser, io} from './../index'
+console.log(connectedUser);
+
 
 router.post("/api/order", auth, ordersController.createOrder);
 router.get("/api/order", auth, ordersController.getOrders);

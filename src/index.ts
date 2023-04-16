@@ -1,12 +1,12 @@
 import express, { NextFunction, Request, Response } from "express";
 import http from "http";
+import fs from "fs";
 import { Server } from "socket.io";
 import { DataSource } from "typeorm";
 import { Users } from "./modules/User";
 import { userRouter } from "./routes/user";
 import { cuisineRouter } from "./routes/cuisines";
 import { Cuisines } from "./modules/Cuisines";
-import fs from "fs";
 import { OtpMaster } from "./modules/OtpMaster";
 import { roleRouter } from "./routes/roles";
 import { Roles } from "./modules/Roles";
@@ -49,7 +49,7 @@ export const io = new Server(server, {
     origin: "*",
   },
 });
-
+export const connectedUser: any = [];
 let portEnv = process.env.DB_PORT || 5432;
 let dbPort: number = +portEnv;
 export const AppDataSource = new DataSource({
@@ -77,7 +77,7 @@ export const AppDataSource = new DataSource({
     OrderItems,
     Followers,
     OrderLogs,
-    Reviews
+    Reviews,
   ],
   synchronize: true,
 });
@@ -112,9 +112,9 @@ export const AppDataSource = new DataSource({
   app.use(cartRouter);
   app.use(orderRouter);
   app.use(followersRouter);
-  app.use(orderLogsRouter)
-  app.use(reviewRouter)
-  app.use(paymentRouter)
+  app.use(orderLogsRouter);
+  app.use(reviewRouter);
+  app.use(paymentRouter);
   app.use((error: any, req: any, res: any, next: any) => {
     if (req.file) {
       fs.unlink(req.file.path, (err) => {
@@ -127,10 +127,21 @@ export const AppDataSource = new DataSource({
     res.status(error.statusCode || 500);
     res.json({ message: error.message || "An unknown error occurred!" });
   });
-
   io.on("connection", (socket) => {
+    const userId = socket.handshake.query.userId;
+
+    connectedUser.push({
+      id: userId,
+      socketId: socket.id,
+    });
+
     socket.on("live_location", (...args) => {
       io.emit("live_to_cutomer", args);
+    });
+    socket.on("order_updated", (...args) => {
+      console.log(args);
+
+      io.emit("get_order", args);
     });
   });
 

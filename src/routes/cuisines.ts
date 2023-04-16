@@ -40,10 +40,6 @@ var upload = multer({ storage: storage }).fields([
 
 router.post("/api/cuisine", auth, upload, cuisineController.createCuisine);
 router.get("/api/cuisines", auth, cuisineController.getCuisines);
-router.get(
-  "/api/cuisine/items",
-  auth,
-  upload,
-  cuisineController.getCuisineItems
-);
+router.get("/api/cuisine/items", auth, cuisineController.getCuisineItems);
+router.patch("/api/cuisine/:id", auth, upload, cuisineController.updateCuisine);
 export { router as cuisineRouter };
