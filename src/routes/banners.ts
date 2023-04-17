@@ -1,8 +1,8 @@
 import express from "express";
-import itemsController from "../controllers/items-controller";
 import auth from "../middleware/auth";
 const router = express.Router();
 import multer from "multer";
+import bannersController from "../controllers/banners-controller";
 
 require("dotenv").config();
 const fs = require("fs");
@@ -59,8 +59,5 @@ const upload = (req: any, res: any, next: any) => {
     next();
   });
 };
-
-router.post("/api/item", auth, upload, itemsController.createItem);
-router.get("/api/items", auth, itemsController.getItems);
-router.patch("/api/item/:id", auth, upload, itemsController.updateItem);
-export { router as itemsRouter };
+router.post("/api/banners", auth, upload, bannersController.addBanners);
+router.get("/api/banners", auth, bannersController.getBanners);

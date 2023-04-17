@@ -53,31 +53,6 @@ const createItem = async (req: any, res: any, next: any) => {
         })
       );
     }
-    // if (imageUploaded || image2Uploaded) {
-    //   if (imageUploaded) {
-    //     let imageResult = await uploadFile(
-    //       image[0],
-    //       `${chef_id}/items/` + image[0].filename
-    //     );
-
-    //     if (imageResult) {
-    //       imageKey = imageResult.Key;
-    //       imageUrl = imageResult.Location;
-    //     }
-    //     await unlinkAsync(image[0].path);
-    //   }
-    //   if (image2Uploaded) {
-    //     let image2Result = await uploadFile(
-    //       image2[0],
-    //       `${chef_id}/items/` + image2[0].filename
-    //     );
-
-    //     if (image2Result) {
-    //       image2Key = image2Result.Key;
-    //       image2Url = image2Result.Location;
-    //     }
-    //   }
-    // }
 
     const item = Items.create({
       chef_id,

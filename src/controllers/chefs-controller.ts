@@ -8,6 +8,7 @@ import { promisify } from "util";
 import fs from "fs";
 import { AppDataSource } from "../";
 import { OrderChefStatus } from "./../helpers/enums";
+import { Not } from "typeorm";
 const unlinkAsync = promisify(fs.unlink);
 
 const createChef = async (req: any, res: any, next: any) => {
@@ -183,6 +184,7 @@ const getChefs = async (req: any, res: any, next: any) => {
   body = {
     ...body,
     ...req.query,
+    status: Not("Deleted"),
   };
 
   if (body.page || body.perPage) {
@@ -438,6 +440,7 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("chefs.items", "items")
       .leftJoinAndSelect("items.reviews", "item_reviews")
       .where(`availability.${day} = ${true}`)
+      .where(`chefs.status != :st`, { st: "Deleted" })
       .getMany();
 
     chefs = chefs.map((chef: any) => {

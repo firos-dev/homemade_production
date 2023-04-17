@@ -8,6 +8,8 @@ import {
 import { OrderItems } from "../modules/OrderItems";
 import { Between } from "typeorm";
 import { io } from "./../index";
+import { Chefs } from "./../modules/Chefs";
+import { sendNotification } from "./../helpers/notification";
 
 const createOrder = async (req: any, res: any, next: any) => {
   const {
@@ -39,6 +41,11 @@ const createOrder = async (req: any, res: any, next: any) => {
       delivery_location_id,
     });
 
+    const chef: any = await Chefs.findOne({
+      where: { id: chef_id },
+      relations: ["user"],
+    });
+
     await order.save().then(async () => {
       const orderItems: any = items.map((item: any) => {
         return {
@@ -53,7 +60,17 @@ const createOrder = async (req: any, res: any, next: any) => {
         .values(orderItems)
         .execute();
     });
-    io.emit("create_order", { data: order });
+    // io.emit("create_order", { data: order });
+    const user = chef.user;
+    const title = "New Order";
+    const body = `You have a new order to prepare.
+    
+    Thank you for your hard work and dedication to providing exceptional food and service.
+    
+    Best regards,
+    
+    Homemade Management`;
+    sendNotification({ user, title, body });
     res.status(201).json({
       status: 0,
       message: "Record has been successfully saved",
@@ -138,6 +155,16 @@ const getOrders = async (req: any, res: any, next: any) => {
 const updateOrder = async (req: any, res: any, next: any) => {
   const { id } = req.params;
   try {
+    const order: any = await Orders.findOne({
+      where: { id },
+      relations: [
+        "user",
+        "chef",
+        "chef.user",
+        "delivery_partner",
+        "delivery_partner.user",
+      ],
+    });
     const updateResult = await AppDataSource.getRepository(Orders)
       .createQueryBuilder()
       .update(Orders)
@@ -145,8 +172,49 @@ const updateOrder = async (req: any, res: any, next: any) => {
       .where("id = :id", { id })
       .returning("*") // '*' means all columns of the updated rows
       .execute();
+
+    console.log(updateResult);
+
     let updatedRows = updateResult.raw;
     io.emit("order_updated", { order: updatedRows });
+    if (req.body.order_status === "Preparing" && order.order_status !== "Preparing") {
+      const user = order.user;
+      const title = "Started Preparing";
+      const body = `Your order is started to preparing`;
+      sendNotification({ user, title, body });
+    }
+
+    if(req.body.order_status === "Cancelled" && order.order_status !== "Cancelled"){
+      const title = "Cancelled";
+      const body = `Your order ${order.order_ref_id} has been cancelled`;
+      sendNotification({ user: order.user, title, body });
+      sendNotification({ user: order.chef.user, title, body });
+      if(order.delivery_partner_id){
+        sendNotification({ user: order.delivery_partner.user, title, body });
+      }
+    }
+
+    if(req.body.order_status === "Processing" && order.order_status !== "Processing"){
+      const title = "Ready to delivery";
+      const body = `Your order ${order.order_ref_id} is ready to be delivered`;
+      sendNotification({ user: order.user, title, body });
+      sendNotification({ user: order.chef.user, title, body });
+    }
+
+    if(req.body.order_status === "Processing" && order.order_status !== "Processing"){
+      const title = "Ready to pick";
+      const body = `Your order ${order.order_ref_id} is ready to be delivered`;
+      sendNotification({ user: order.user, title, body });
+      sendNotification({ user: order.chef.user, title, body });
+    }
+
+    if(req.body.order_status === "Completed" && order.order_status !== "Completed"){
+      const title = "Order Delivered";
+      const body = `Your order ${order.order_ref_id} has been successfully delivered`;
+      sendNotification({ user: order.user, title, body });
+      sendNotification({ user: order.chef.user, title, body });
+    }
+
     res.status(200).json({
       status: 0,
       message: "Record has been succefully updated",

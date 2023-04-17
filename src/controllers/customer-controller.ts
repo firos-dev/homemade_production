@@ -5,6 +5,7 @@ import { Customers } from "./../modules/Customers";
 import uploadFile from "../helpers/s3";
 import { promisify } from "util";
 import fs from "fs";
+import { Not } from "typeorm";
 const unlinkAsync = promisify(fs.unlink);
 const createCustomer = async (req: any, res: any, next: any) => {
   const {
@@ -130,6 +131,7 @@ const getCustomers = async (req: any, res: any, next: any) => {
   body = {
     ...body,
     ...req.query,
+    status: Not("Deleted")
   };
 
   if (body.page || body.perPage) {
