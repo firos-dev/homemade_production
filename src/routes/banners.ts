@@ -61,3 +61,5 @@ const upload = (req: any, res: any, next: any) => {
 };
 router.post("/api/banners", auth, upload, bannersController.addBanners);
 router.get("/api/banners", auth, bannersController.getBanners);
+
+export { router as bannersRouter };

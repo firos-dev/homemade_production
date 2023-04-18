@@ -25,13 +25,12 @@ const addBanners = async (req: any, res: any, next: any) => {
   try {
     const imageArr = req.files;
     let images: any = [];
-
     if (imageArr.length > 0) {
       await Promise.all(
         imageArr.map(async (image: any) => {
           let imageResult = await uploadFile(
             image,
-            `${chef_id}/items/` + image.filename
+            `banners/` + image.filename
           );
           images.push(imageResult.Location);
           await unlinkAsync(image.path);
