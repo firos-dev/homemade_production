@@ -14,6 +14,7 @@ import {
 import { Users } from "./User";
 import { Orders } from "./Orders";
 import { Items } from "./Items";
+import { Invoices } from "./Invoices";
 
 @Entity("order_items")
 export class OrderItems extends BaseEntity {
@@ -26,6 +27,15 @@ export class OrderItems extends BaseEntity {
 
   @Column()
   order_id: String;
+
+  @ManyToOne(() => Invoices, (invoice) => invoice.items)
+  @JoinColumn({ name: "invoice_id" })
+  invoice: Users;
+
+  @Column({
+    nullable: true
+  })
+  invoice_id: String;
 
   @ManyToOne(() => Items)
   @JoinColumn({ name: "item_id" })
@@ -88,6 +98,11 @@ export class OrderItems extends BaseEntity {
     nullable: true,
   })
   allergic_ingredients: string;
+  
+  @Column({
+    nullable: true
+  })
+  commission: string;
 
   @CreateDateColumn()
   created_at: Date;

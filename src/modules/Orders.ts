@@ -18,6 +18,7 @@ import { Chefs } from "./Chefs";
 import { DeliveryPartners } from "./DeliveryPartners";
 import { Locations } from "./Locations";
 import { OrderLogs } from "./OrderLogs";
+import { Invoices } from "./Invoices";
 
 @Entity("orders")
 export class Orders extends BaseEntity {
@@ -25,7 +26,7 @@ export class Orders extends BaseEntity {
   id: string;
 
   @Column({
-    default: "OD12354"
+    default: "OD12354",
   })
   order_ref_id: String;
 
@@ -68,6 +69,16 @@ export class Orders extends BaseEntity {
 
   @OneToMany(() => OrderLogs, (logs) => logs.order)
   logs: OrderLogs[];
+
+  @OneToOne(() => Invoices, (invoice) => invoice.order)
+  @JoinColumn({ name: "invoice_id" })
+  invoice: Invoices;
+
+  @Column({
+    nullable: true,
+    name: "invoice_id",
+  })
+  invoice_id: string;
 
   @Column({
     type: "enum",
@@ -121,6 +132,12 @@ export class Orders extends BaseEntity {
     nullable: true,
   })
   offer_amount: string;
+
+  @Column({
+    type: "boolean",
+    default: false,
+  })
+  reviewed: Boolean;
 
   @CreateDateColumn()
   created_at: Date;

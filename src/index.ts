@@ -41,6 +41,9 @@ import { reviewRouter } from "./routes/reviews";
 import { paymentRouter } from "./routes/payments";
 import { Banners } from "./modules/Banners";
 import { bannersRouter } from "./routes/banners";
+import { IdMaster } from "./modules/IdMaster";
+import { idMasterRouter } from "./routes/idmaster";
+import { Invoices } from "./modules/Invoices";
 
 require("dotenv").config();
 const app = express();
@@ -80,7 +83,9 @@ export const AppDataSource = new DataSource({
     Followers,
     OrderLogs,
     Reviews,
-    Banners
+    Banners,
+    IdMaster,
+    Invoices
   ],
   synchronize: true,
 });
@@ -118,7 +123,8 @@ export const AppDataSource = new DataSource({
   app.use(orderLogsRouter);
   app.use(reviewRouter);
   app.use(paymentRouter);
-  app.use(bannersRouter)
+  app.use(bannersRouter);
+  app.use(idMasterRouter);
   app.use((error: any, req: any, res: any, next: any) => {
     if (req.file) {
       fs.unlink(req.file.path, (err) => {

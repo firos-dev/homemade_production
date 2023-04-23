@@ -24,4 +24,8 @@ function uploadFile(file: any, filePath: any) {
   return s3.upload(uploadParams).promise();
 }
 
+// function deleteFile(){
+
+// }
+
 export default uploadFile;

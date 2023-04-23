@@ -22,6 +22,7 @@ const createOrder = async (req: any, res: any, next: any) => {
     delivery_date,
     delivery_time,
     delivery_location_id,
+    instructions
   } = req.body;
   try {
     if (!user_id) {
@@ -39,6 +40,7 @@ const createOrder = async (req: any, res: any, next: any) => {
       order_status: OrderStatus.CREATED,
       order_chef_status: OrderChefStatus.RECIEVED,
       delivery_location_id,
+      instructions
     });
 
     const chef: any = await Chefs.findOne({
@@ -177,38 +179,53 @@ const updateOrder = async (req: any, res: any, next: any) => {
 
     let updatedRows = updateResult.raw;
     io.emit("order_updated", { order: updatedRows });
-    if (req.body.order_status === "Preparing" && order.order_status !== "Preparing") {
+    if (
+      req.body.order_status === "Preparing" &&
+      order.order_status !== "Preparing"
+    ) {
       const user = order.user;
       const title = "Started Preparing";
       const body = `Your order is started to preparing`;
       sendNotification({ user, title, body });
     }
 
-    if(req.body.order_status === "Cancelled" && order.order_status !== "Cancelled"){
+    if (
+      req.body.order_status === "Cancelled" &&
+      order.order_status !== "Cancelled"
+    ) {
       const title = "Cancelled";
       const body = `Your order ${order.order_ref_id} has been cancelled`;
       sendNotification({ user: order.user, title, body });
       sendNotification({ user: order.chef.user, title, body });
-      if(order.delivery_partner_id){
+      if (order.delivery_partner_id) {
         sendNotification({ user: order.delivery_partner.user, title, body });
       }
     }
 
-    if(req.body.order_status === "Processing" && order.order_status !== "Processing"){
+    if (
+      req.body.order_status === "Processing" &&
+      order.order_status !== "Processing"
+    ) {
       const title = "Ready to delivery";
       const body = `Your order ${order.order_ref_id} is ready to be delivered`;
       sendNotification({ user: order.user, title, body });
       sendNotification({ user: order.chef.user, title, body });
     }
 
-    if(req.body.order_status === "Processing" && order.order_status !== "Processing"){
+    if (
+      req.body.order_status === "Processing" &&
+      order.order_status !== "Processing"
+    ) {
       const title = "Ready to pick";
       const body = `Your order ${order.order_ref_id} is ready to be delivered`;
       sendNotification({ user: order.user, title, body });
       sendNotification({ user: order.chef.user, title, body });
     }
 
-    if(req.body.order_status === "Completed" && order.order_status !== "Completed"){
+    if (
+      req.body.order_status === "Completed" &&
+      order.order_status !== "Completed"
+    ) {
       const title = "Order Delivered";
       const body = `Your order ${order.order_ref_id} has been successfully delivered`;
       sendNotification({ user: order.user, title, body });
@@ -282,10 +299,32 @@ const getDeliveriesCount = async (req: any, res: any, next: any) => {
   }
 };
 
+const getLastReviewPending = async (req: any, res: any, next: any) => {
+  const { customer_id } = req.params;
+  try {
+    const order = await Orders.find({
+      where: { reviewed: false },
+      order: { updated_at: "DESC" },
+    });
+    res.status(200).json({
+      status: 0,
+      data: order?.[0],
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.messages,
+    });
+  }
+};
+
 export default {
   createOrder,
   getOrders,
   updateOrder,
   getCurrentOrder,
   getDeliveriesCount,
+  getLastReviewPending
 };

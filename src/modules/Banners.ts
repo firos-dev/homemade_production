@@ -42,6 +42,13 @@ export class Banners extends BaseEntity {
   images: string[];
 
   @Column({
+    type: "text",
+    array: true,
+    nullable: true,
+  })
+  image_keys: string[];
+
+  @Column({
     type: "enum",
     enum: Status,
     default: Status.ACTIVE

@@ -25,6 +25,7 @@ const addBanners = async (req: any, res: any, next: any) => {
   try {
     const imageArr = req.files;
     let images: any = [];
+    let image_keys: any = [];
     if (imageArr.length > 0) {
       await Promise.all(
         imageArr.map(async (image: any) => {
@@ -33,6 +34,7 @@ const addBanners = async (req: any, res: any, next: any) => {
             `banners/` + image.filename
           );
           images.push(imageResult.Location);
+          image_keys.push(imageResult.Key);
           await unlinkAsync(image.path);
         })
       );
@@ -42,6 +44,7 @@ const addBanners = async (req: any, res: any, next: any) => {
       name,
       chef_id,
       images,
+      image_keys,
     });
 
     await banner.save();
@@ -95,4 +98,28 @@ const getBanners = async (req: any, res: any, next: any) => {
   }
 };
 
-export default { addBanners, getBanners };
+const deleteBanner = async (req: any, res: any, next: any) => {
+  const { id } = req.params;
+
+  try {
+    let banner = await Banners.findOne({where: {id}})
+    if(!banner){
+      throw new Error("Something went wrong. Please try again")
+    }
+
+    await Banners.delete({ id });
+    res.status(200).json({
+      status: 0,
+      data: "Data has been successfully deleted",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.messages,
+    });
+  }
+};
+
+export default { addBanners, getBanners, deleteBanner };

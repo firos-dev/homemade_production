@@ -12,4 +12,5 @@ router.patch("/api/order/:id", auth, ordersController.updateOrder);
 router.get("/api/current/order", auth, ordersController.getCurrentOrder);
 router.get("/api/current/order", (req, res) => {});
 router.get("/api/deliveries/count", auth, ordersController.getDeliveriesCount);
+router.get("/api/order/review/pending/:customer_id", auth, ordersController.getLastReviewPending);
 export { router as orderRouter };
