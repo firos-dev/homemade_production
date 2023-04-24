@@ -62,6 +62,12 @@ export class Invoices extends BaseEntity {
   })
   commission: string;
 
+  @Column({
+    type: "boolean",
+    default: false
+  })
+  delivery_charge_excluded: Boolean;
+
   @CreateDateColumn()
   created_at: Date;
 

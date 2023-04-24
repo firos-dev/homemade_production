@@ -106,6 +106,12 @@ export class Orders extends BaseEntity {
   delivery_charge: string;
 
   @Column({
+    type: "boolean",
+    default: false
+  })
+  delivery_charge_excluded: Boolean;
+
+  @Column({
     type: "date",
     nullable: true,
   })

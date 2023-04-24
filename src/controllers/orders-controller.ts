@@ -22,7 +22,7 @@ const createOrder = async (req: any, res: any, next: any) => {
     delivery_date,
     delivery_time,
     delivery_location_id,
-    instructions
+    instructions,
   } = req.body;
   try {
     if (!user_id) {
@@ -40,7 +40,7 @@ const createOrder = async (req: any, res: any, next: any) => {
       order_status: OrderStatus.CREATED,
       order_chef_status: OrderChefStatus.RECIEVED,
       delivery_location_id,
-      instructions
+      instructions,
     });
 
     const chef: any = await Chefs.findOne({
@@ -247,14 +247,34 @@ const updateOrder = async (req: any, res: any, next: any) => {
 };
 
 const getCurrentOrder = async (req: any, res: any, next: any) => {
-  const { delivery_partner_id } = req.query;
+  const { delivery_partner_id, chef_id, user_id } = req.query;
   try {
-    let whereClause: any = [
-      { delivery_partner_id, order_delivery_status: "Accepted" },
-      { delivery_partner_id, order_delivery_status: "Ready to pick" },
-      { delivery_partner_id, order_delivery_status: "Collected" },
-      { delivery_partner_id, order_delivery_status: "Ready to drop" },
-    ];
+    let whereClause: any;
+    if (delivery_partner_id) {
+      whereClause = [
+        { delivery_partner_id, order_delivery_status: "Accepted" },
+        { delivery_partner_id, order_delivery_status: "Ready to pick" },
+        { delivery_partner_id, order_delivery_status: "Collected" },
+        { delivery_partner_id, order_delivery_status: "Ready to drop" },
+      ];
+    } else if (chef_id) {
+      whereClause = [
+        { chef_id, order_chef_status: "Preparing" },
+        { chef_id, order_chef_status: "Ready" },
+      ];
+    } else if (user_id) {
+      whereClause = [
+        { user_id, order_status: "Preparing" },
+        { user_id, order_status: "Processing" },
+      ];
+    } else {
+      whereClause = [
+        { order_delivery_status: "Accepted" },
+        { order_delivery_status: "Ready to pick" },
+        { order_delivery_status: "Collected" },
+        { order_delivery_status: "Ready to drop" },
+      ];
+    }
     const delivery = await Orders.find({
       where: whereClause,
       relations: [
@@ -326,5 +346,5 @@ export default {
   updateOrder,
   getCurrentOrder,
   getDeliveriesCount,
-  getLastReviewPending
+  getLastReviewPending,
 };

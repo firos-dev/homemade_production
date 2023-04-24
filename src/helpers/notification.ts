@@ -1,7 +1,7 @@
 import axios from "axios";
 
-export const sendNotification = ({ user, title, body, data}: any) => {
-  axios
+export const sendNotification = async ({ user, title, body, data }: any) => {
+  await axios
     .post(
       "https://fcm.googleapis.com/fcm/send",
       {
