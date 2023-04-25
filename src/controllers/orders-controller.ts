@@ -175,8 +175,6 @@ const updateOrder = async (req: any, res: any, next: any) => {
       .returning("*") // '*' means all columns of the updated rows
       .execute();
 
-    console.log(updateResult);
-
     let updatedRows = updateResult.raw;
     io.emit("order_updated", { order: updatedRows });
     if (
@@ -259,6 +257,7 @@ const getCurrentOrder = async (req: any, res: any, next: any) => {
       ];
     } else if (chef_id) {
       whereClause = [
+        { chef_id, order_chef_status: "Accepted" },
         { chef_id, order_chef_status: "Preparing" },
         { chef_id, order_chef_status: "Ready" },
       ];
@@ -290,6 +289,41 @@ const getCurrentOrder = async (req: any, res: any, next: any) => {
     res.status(200).json({
       status: 0,
       data: delivery,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.messages,
+    });
+  }
+};
+
+const getAllOrders = async (req: any, res: any, next: any) => {
+  const { delivery_partner_id, chef_id, user_id } = req.query;
+  try {
+    let whereClause: any = [
+      { chef_id, order_chef_status: "Recieved" },
+      { chef_id, order_chef_status: "Accepted" },
+      { chef_id, order_chef_status: "Preparing" },
+      { chef_id, order_chef_status: "Ready" },
+    ];
+    const orders = await Orders.find({
+      where: whereClause,
+      relations: [
+        "items",
+        "user",
+        "delivery_location",
+        "chef",
+        "chef.drop_off_point",
+        "chef.user",
+        "logs",
+      ],
+    });
+    res.status(200).json({
+      status: 0,
+      data: orders,
     });
   } catch (error) {
     console.log(error);
@@ -347,4 +381,5 @@ export default {
   getCurrentOrder,
   getDeliveriesCount,
   getLastReviewPending,
+  getAllOrders,
 };

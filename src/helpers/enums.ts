@@ -24,6 +24,7 @@ export enum OrderStatus {
 
 export enum OrderChefStatus {
   RECIEVED = "Recieved",
+  ACCEPTED = "Accepted",
   PREPARING = "Preparing",
   REJECTED = "Rejected",
   READY = "Ready",

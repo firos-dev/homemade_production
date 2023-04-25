@@ -1,7 +1,9 @@
+import { Orders } from "./../modules/Orders";
 import { Reviews } from "./../modules/Reviews";
 
 const addReview = async (req: any, res: any, next: any) => {
   const {
+    order_id,
     reviewed_id,
     chef_id,
     delivery_partner_id,
@@ -9,11 +11,14 @@ const addReview = async (req: any, res: any, next: any) => {
     item_review,
     chef_review,
     delivery_review,
-    star_count
+    star_count,
   } = req.body;
   try {
     if (!reviewed_id) {
       throw new Error("Please provide reviewed by user");
+    }
+    if (order_id) {
+      await Orders.update({ id: order_id }, { reviewed: true });
     }
     let review = Reviews.create({
       reviewed_id,
@@ -23,7 +28,7 @@ const addReview = async (req: any, res: any, next: any) => {
       item_review,
       chef_review,
       delivery_review,
-      star_count
+      star_count,
     });
 
     await review.save();
@@ -33,7 +38,7 @@ const addReview = async (req: any, res: any, next: any) => {
       data: review,
     });
   } catch (error) {
-console.log(error);
+    console.log(error);
 
     res.status(400).json({
       status: 0,
@@ -62,7 +67,7 @@ const getReviews = async (req: any, res: any, next: any) => {
     const data = await Reviews.find({
       where: body,
       ...offset,
-      relations: ["reviewed_by", "item", "chef","delivery_partner"],
+      relations: ["reviewed_by", "item", "chef", "delivery_partner"],
       order: { created_at: "DESC" },
     });
     res.status(200).json({
@@ -96,4 +101,4 @@ const getAvrageRating = async (req: any, res: any, next: any) => {
   }
 };
 
-export default {addReview, getReviews, getAvrageRating}
+export default { addReview, getReviews, getAvrageRating };
