@@ -20,6 +20,7 @@ export enum OrderStatus {
   PROCESSING = "Processing",
   DELIVERED = "Delivered",
   COMPLETED = "Completed",
+  DELETED = "Deleted"
 }
 
 export enum OrderChefStatus {

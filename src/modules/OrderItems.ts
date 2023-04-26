@@ -33,7 +33,7 @@ export class OrderItems extends BaseEntity {
   invoice: Users;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   invoice_id: String;
 
@@ -98,11 +98,18 @@ export class OrderItems extends BaseEntity {
     nullable: true,
   })
   allergic_ingredients: string;
-  
+
   @Column({
-    nullable: true
+    nullable: true,
   })
   commission: string;
+
+  @Column({
+    type: "enum",
+    enum: Status,
+    default: Status.ACTIVE,
+  })
+  status: Status;
 
   @CreateDateColumn()
   created_at: Date;

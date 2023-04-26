@@ -6,10 +6,11 @@ import {
   OrderStatus,
 } from "../helpers/enums";
 import { OrderItems } from "../modules/OrderItems";
-import { Between } from "typeorm";
+import { Between, Not } from "typeorm";
 import { io } from "./../index";
 import { Chefs } from "./../modules/Chefs";
 import { sendNotification } from "./../helpers/notification";
+import { Activity, OrderLogs } from "../modules/OrderLogs";
 
 const createOrder = async (req: any, res: any, next: any) => {
   const {
@@ -62,6 +63,13 @@ const createOrder = async (req: any, res: any, next: any) => {
         .values(orderItems)
         .execute();
     });
+
+    const log = OrderLogs.create({
+      order_id: order.id,
+      activity: Activity.CREATED,
+    });
+    await log.save();
+
     // io.emit("create_order", { data: order });
     const user = chef.user;
     const title = "New Order";
@@ -113,20 +121,47 @@ const getOrders = async (req: any, res: any, next: any) => {
   }
 
   try {
-    let orders: any = await Orders.find({
-      where: { ...where },
-      ...offset,
-      relations: [
-        "items",
-        "user",
+    let orders = await AppDataSource.getRepository(Orders)
+      .createQueryBuilder("orders")
+      .leftJoinAndSelect("orders.items", "items", "items.status != :is", {
+        is: "Deleted",
+      })
+      .leftJoinAndSelect("orders.user", "user")
+      .leftJoinAndSelect(
+        "orders.delivery_location",
         "delivery_location",
-        "chef",
+        "delivery_location.status != :ds",
+        { ds: "Deleted" }
+      )
+      .leftJoinAndSelect("orders.chef", "chef", "chef.status != :cs", {
+        cs: "Deleted",
+      })
+      .leftJoinAndSelect(
         "chef.drop_off_point",
-        "chef.user",
-        "logs",
-      ],
-      order: { created_at: "DESC" },
-    });
+        "drop_off_point",
+        "drop_off_point.status != :dos",
+        { dos: "Deleted" }
+      )
+      .leftJoinAndSelect("orders.logs", "logs")
+      .where(body)
+      .andWhere("orders.order_status != :os", { os: "Deleted" })
+      .orderBy("orders.updated_at", "DESC")
+      .getMany();
+
+    // let orders: any = await Orders.find({
+    //   where: { ...where },
+    //   ...offset,
+    //   relations: [
+    //     "items",
+    //     "user",
+    //     "delivery_location",
+    //     "chef",
+    //     "chef.drop_off_point",
+    //     "chef.user",
+    //     "logs",
+    //   ],
+    //   order: { created_at: "DESC" },
+    // });
     orders = orders.map((order: any) => {
       return {
         ...order,

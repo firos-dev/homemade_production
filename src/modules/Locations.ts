@@ -107,6 +107,13 @@ export class Locations extends BaseEntity {
     enum: AddressType,
   })
   address_type: AddressType;
+  
+  @Column({
+    type: "enum",
+    enum: Status,
+    default: Status.ACTIVE
+  })
+  status: Status;
 
   @CreateDateColumn()
   created_at: Date;
