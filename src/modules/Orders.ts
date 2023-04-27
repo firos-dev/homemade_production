@@ -140,6 +140,11 @@ export class Orders extends BaseEntity {
   offer_amount: string;
 
   @Column({
+    nullable: true,
+  })
+  distance: string;
+
+  @Column({
     type: "boolean",
     default: false,
   })

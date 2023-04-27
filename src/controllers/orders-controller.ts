@@ -1,3 +1,4 @@
+import { Users } from "./../modules/User";
 import { AppDataSource } from "./../index";
 import { Orders } from "./../modules/Orders";
 import {
@@ -11,6 +12,8 @@ import { io } from "./../index";
 import { Chefs } from "./../modules/Chefs";
 import { sendNotification } from "./../helpers/notification";
 import { Activity, OrderLogs } from "../modules/OrderLogs";
+import { Locations } from "../modules/Locations";
+import calculateDistance from "../helpers/distance";
 
 const createOrder = async (req: any, res: any, next: any) => {
   const {
@@ -29,7 +32,19 @@ const createOrder = async (req: any, res: any, next: any) => {
     if (!user_id) {
       throw new Error("Chef ID required");
     }
+    const chef: any = await Chefs.findOne({
+      where: { id: chef_id },
+      relations: ["user", "drop_off_point"],
+    });
 
+    const deliveryLocation: any = await Locations.findOne({
+      where: { id: delivery_location_id },
+    });
+    let lat1 = chef.drop_off_point.latitude;
+    let long1 = chef.drop_off_point.longitude;
+    let lat2 = deliveryLocation.latitude;
+    let long2 = deliveryLocation.longitude;
+    let distance: any = await calculateDistance(lat1, long1, lat2, long2);
     const order = Orders.create({
       user_id,
       chef_id,
@@ -42,11 +57,7 @@ const createOrder = async (req: any, res: any, next: any) => {
       order_chef_status: OrderChefStatus.RECIEVED,
       delivery_location_id,
       instructions,
-    });
-
-    const chef: any = await Chefs.findOne({
-      where: { id: chef_id },
-      relations: ["user"],
+      distance,
     });
 
     await order.save().then(async () => {
@@ -133,9 +144,10 @@ const getOrders = async (req: any, res: any, next: any) => {
         "delivery_location.status != :ds",
         { ds: "Deleted" }
       )
-      .leftJoinAndSelect("orders.chef", "chef", "chef.status != :cs", {
-        cs: "Deleted",
-      })
+      .leftJoinAndSelect("orders.chef", "chef")
+      .leftJoinAndSelect("chef.user", "chef_user")
+      .leftJoinAndSelect("orders.delivery_partner", "delivery_partner")
+      .leftJoinAndSelect("delivery_partner.user", "delivery_partner_user")
       .leftJoinAndSelect(
         "chef.drop_off_point",
         "drop_off_point",
@@ -202,10 +214,31 @@ const updateOrder = async (req: any, res: any, next: any) => {
         "delivery_partner.user",
       ],
     });
+    const chef: any = await Chefs.findOne({
+      where: { id: order.chef_id },
+      relations: ["user", "drop_off_point"],
+    });
+
+    const deliveryLocation: any = await Locations.findOne({
+      where: { id: order.delivery_location_id },
+    });
+    let lat1 = chef.drop_off_point.latitude;
+    let long1 = chef.drop_off_point.longitude;
+    let lat2 = deliveryLocation.latitude;
+    let long2 = deliveryLocation.longitude;
+    let distance: any = await calculateDistance(lat1, long1, lat2, long2);
+    distance = distance.toFixed(2);
+    let body: any = req.body;
+    body = {
+      ...body,
+      distance,
+    };
+    console.log(body);
+
     const updateResult = await AppDataSource.getRepository(Orders)
       .createQueryBuilder()
       .update(Orders)
-      .set(req.body)
+      .set(body)
       .where("id = :id", { id })
       .returning("*") // '*' means all columns of the updated rows
       .execute();
@@ -338,12 +371,22 @@ const getCurrentOrder = async (req: any, res: any, next: any) => {
 const getAllOrders = async (req: any, res: any, next: any) => {
   const { delivery_partner_id, chef_id, user_id } = req.query;
   try {
-    let whereClause: any = [
-      { chef_id, order_chef_status: "Recieved" },
-      { chef_id, order_chef_status: "Accepted" },
-      { chef_id, order_chef_status: "Preparing" },
-      { chef_id, order_chef_status: "Ready" },
-    ];
+    let whereClause: any;
+    if (chef_id) {
+      whereClause = [
+        { chef_id, order_chef_status: "Recieved" },
+        { chef_id, order_chef_status: "Accepted" },
+        { chef_id, order_chef_status: "Preparing" },
+        { chef_id, order_chef_status: "Ready" },
+      ];
+    } else if (user_id) {
+      whereClause = [
+        { user_id, order_chef_status: "Recieved" },
+        { user_id, order_chef_status: "Accepted" },
+        { user_id, order_chef_status: "Preparing" },
+        { user_id, order_chef_status: "Ready" },
+      ];
+    }
     const orders = await Orders.find({
       where: whereClause,
       relations: [
