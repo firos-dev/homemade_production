@@ -3,6 +3,7 @@ import multer from "multer";
 import uploadFile from "../helpers/s3";
 import { promisify } from "util";
 import fs from "fs";
+import { AppDataSource } from "./../index";
 const unlinkAsync = promisify(fs.unlink);
 
 require("dotenv").config();
@@ -165,21 +166,20 @@ const updateItem = async (req: any, res: any, next: any) => {
     let body = {
       ...req.body,
     };
-    
+
     let updated_images: any;
     let updated_image_keys: any;
     if (body?.deleted_images) {
       let deleted_images = JSON.parse(body.deleted_images);
-      
+
       deleted_images.map((index: any) => {
-        updated_images = item.images
-        updated_image_keys = item.image_keys
+        updated_images = item.images;
+        updated_image_keys = item.image_keys;
         updated_images.splice(index, 1);
         updated_image_keys.splice(index, 1);
       });
       delete body.deleted_images;
     }
-
 
     if (images?.length) {
       updated_images = [...updated_images, ...images];
@@ -202,7 +202,7 @@ const updateItem = async (req: any, res: any, next: any) => {
     });
   } catch (error) {
     console.log(error);
-    
+
     res.status(400).json({
       status: 1,
       message: error.message,
@@ -210,6 +210,80 @@ const updateItem = async (req: any, res: any, next: any) => {
   }
 };
 
+const getNearestItemsbyAvailability = async (req: any, res: any, next: any) => {
+  const page = req.query.page || null;
 
+  const perPage = req.query.perPage || null;
 
-export default { createItem, getItems, updateItem };
+  const offset = {
+    skip: Number(page) * Number(perPage),
+    take: Number(perPage),
+  };
+
+  let body = req.query;
+
+  if (body.page || body.perPage) {
+    delete body.page;
+    delete body.perPage;
+  }
+  const { latitude, longitude } = req.query;
+
+  try {
+    const isFun = await AppDataSource.query(`
+    SELECT EXISTS (
+      SELECT FROM pg_proc
+      WHERE proname = 'radians'
+    );
+  `);
+  console.log(isFun[0].exists);
+  
+  
+    const items = await AppDataSource.query(`
+      SELECT i.name, i.chef_id, i.portion_size,
+      ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( l.latitude ) ) 
+        * cos( radians( l.longitude ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+        * sin( radians( l.latitude ) ) ) ) AS distance 
+      FROM items i
+      JOIN chefs c ON i.chef_id = c.id
+      JOIN locations l ON c.drop_off_point_id = l.id
+      WHERE ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( l.latitude ) ) 
+        * cos( radians( l.longitude ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+        * sin( radians( l.latitude ) ) ) ) < 50
+      ORDER BY distance`
+    );
+
+    // console.log(users);
+    // items = items.map((item: any) => {
+    //   let totalReviews = item.reviews.length;
+    //   let reviewSum = item.reviews.reduce(
+    //     (a: any, b: any) => a + Number(b.star_count),
+    //     0
+    //   );
+    //   let itemStar = reviewSum / totalReviews;
+    //   return {
+    //     ...item,
+    //     item_star: itemStar ? itemStar.toFixed(1) : "0",
+    //     item_reviews: totalReviews,
+    //   };
+    // });
+
+    res.status(200).json({
+      status: 0,
+      data: items,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.messages,
+    });
+  }
+};
+
+export default {
+  createItem,
+  getItems,
+  updateItem,
+  getNearestItemsbyAvailability,
+};

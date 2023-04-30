@@ -14,6 +14,7 @@ import { sendNotification } from "./../helpers/notification";
 import { Activity, OrderLogs } from "../modules/OrderLogs";
 import { Locations } from "../modules/Locations";
 import calculateDistance from "../helpers/distance";
+import { Items } from "../modules/Items";
 
 const createOrder = async (req: any, res: any, next: any) => {
   const {
@@ -36,15 +37,17 @@ const createOrder = async (req: any, res: any, next: any) => {
       where: { id: chef_id },
       relations: ["user", "drop_off_point"],
     });
-
-    const deliveryLocation: any = await Locations.findOne({
-      where: { id: delivery_location_id },
-    });
-    let lat1 = chef.drop_off_point.latitude;
-    let long1 = chef.drop_off_point.longitude;
-    let lat2 = deliveryLocation.latitude;
-    let long2 = deliveryLocation.longitude;
-    let distance: any = await calculateDistance(lat1, long1, lat2, long2);
+    let distance: any;
+    if (chef && chef.drop_off_point) {
+      const deliveryLocation: any = await Locations.findOne({
+        where: { id: delivery_location_id },
+      });
+      let lat1 = chef.drop_off_point.latitude;
+      let long1 = chef.drop_off_point.longitude;
+      let lat2 = deliveryLocation.latitude;
+      let long2 = deliveryLocation.longitude;
+      distance = await calculateDistance(lat1, long1, lat2, long2);
+    }
     const order = Orders.create({
       user_id,
       chef_id,
@@ -61,12 +64,18 @@ const createOrder = async (req: any, res: any, next: any) => {
     });
 
     await order.save().then(async () => {
-      const orderItems: any = items.map((item: any) => {
-        return {
-          ...item,
-          order_id: order.id,
-        };
-      });
+      const orderItems: any = await Promise.all(
+        items.map(async (id: any) => {
+          const item: any = await Items.findOne({ where: { id } });
+          let i = {
+            ...item,
+            order_id: order.id,
+            item_id: item.id,
+          };
+          delete i.id;
+          return i;
+        })
+      );
       await AppDataSource.getRepository(OrderItems)
         .createQueryBuilder()
         .insert()
@@ -75,13 +84,13 @@ const createOrder = async (req: any, res: any, next: any) => {
         .execute();
     });
 
-    const log = OrderLogs.create({
+    const log: any = OrderLogs.create({
       order_id: order.id,
       activity: Activity.CREATED,
+      datetime: new Date().toISOString().slice(0, 19).replace("T", " "),
     });
     await log.save();
 
-    // io.emit("create_order", { data: order });
     const user = chef.user;
     const title = "New Order";
     const body = `You have a new order to prepare.
@@ -381,10 +390,9 @@ const getAllOrders = async (req: any, res: any, next: any) => {
       ];
     } else if (user_id) {
       whereClause = [
-        { user_id, order_chef_status: "Recieved" },
-        { user_id, order_chef_status: "Accepted" },
+        { user_id, order_chef_status: "Created" },
         { user_id, order_chef_status: "Preparing" },
-        { user_id, order_chef_status: "Ready" },
+        { user_id, order_chef_status: "Processing" },
       ];
     }
     const orders = await Orders.find({
@@ -432,15 +440,29 @@ const getDeliveriesCount = async (req: any, res: any, next: any) => {
 };
 
 const getLastReviewPending = async (req: any, res: any, next: any) => {
-  const { customer_id } = req.params;
+  const { user_id } = req.params;
   try {
-    const order = await Orders.find({
-      where: { reviewed: false },
-      order: { updated_at: "DESC" },
-    });
+    let orders = await AppDataSource.getRepository(Orders)
+      .createQueryBuilder("orders")
+      .leftJoinAndSelect("orders.items", "items", "items.status != :is", {
+        is: "Deleted",
+      })
+      .leftJoinAndSelect("orders.user", "user")
+      .leftJoinAndSelect("orders.delivery_location", "delivery_location")
+      .leftJoinAndSelect("orders.chef", "chef")
+      .leftJoinAndSelect("chef.user", "chef_user")
+      .leftJoinAndSelect("orders.delivery_partner", "delivery_partner")
+      .leftJoinAndSelect("delivery_partner.user", "delivery_partner_user")
+      .leftJoinAndSelect("chef.drop_off_point", "drop_off_point")
+      .leftJoinAndSelect("orders.logs", "logs")
+      .where({ reviewed: false, user_id })
+      .andWhere("orders.order_status = :os", { os: "Completed" })
+      .orderBy("orders.updated_at", "DESC")
+      .getMany();
+
     res.status(200).json({
       status: 0,
-      data: order?.[0],
+      data: orders,
     });
   } catch (error) {
     console.log(error);
