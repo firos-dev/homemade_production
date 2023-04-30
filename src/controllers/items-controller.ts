@@ -251,7 +251,8 @@ const getNearestItemsbyAvailability = async (req: any, res: any, next: any) => {
       WHERE a.${day} = true AND i.status != 'Deleted' AND c.status != 'Deleted' AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
         * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
         * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) < 50
-      ORDER BY distance`);
+      ORDER BY distance
+      LIMIT ${offset.take} OFFSET ${offset.skip}`);
 
     let ids = itemsIds.map((r: any) => r.id);
 
