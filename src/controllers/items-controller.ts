@@ -226,46 +226,42 @@ const getNearestItemsbyAvailability = async (req: any, res: any, next: any) => {
     delete body.page;
     delete body.perPage;
   }
-  const { latitude, longitude } = req.query;
+  let days = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday",
+  ];
+  const { latitude, longitude, day } = req.query;
 
   try {
-    const isFun = await AppDataSource.query(`
-    SELECT EXISTS (
-      SELECT FROM pg_proc
-      WHERE proname = 'radians'
-    );
-  `);
-  console.log(isFun[0].exists);
-  
-  
-    const items = await AppDataSource.query(`
-      SELECT i.name, i.chef_id, i.portion_size,
-      ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( l.latitude ) ) 
-        * cos( radians( l.longitude ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
-        * sin( radians( l.latitude ) ) ) ) AS distance 
+    if (!latitude || !longitude || !day || !days.includes(day)) {
+      throw new Error("Invalid request");
+    }
+    const itemsIds = await AppDataSource.query(`SELECT i.id,
+      ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC)) ) 
+        * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+        * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) AS distance
       FROM items i
       JOIN chefs c ON i.chef_id = c.id
       JOIN locations l ON c.drop_off_point_id = l.id
-      WHERE ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( l.latitude ) ) 
-        * cos( radians( l.longitude ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
-        * sin( radians( l.latitude ) ) ) ) < 50
-      ORDER BY distance`
-    );
+      JOIN availabilities a ON a.chef_id = c.id
+      WHERE a.${day} = true AND i.status != 'Deleted' AND c.status != 'Deleted' AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
+        * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+        * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) < 50
+      ORDER BY distance`);
 
-    // console.log(users);
-    // items = items.map((item: any) => {
-    //   let totalReviews = item.reviews.length;
-    //   let reviewSum = item.reviews.reduce(
-    //     (a: any, b: any) => a + Number(b.star_count),
-    //     0
-    //   );
-    //   let itemStar = reviewSum / totalReviews;
-    //   return {
-    //     ...item,
-    //     item_star: itemStar ? itemStar.toFixed(1) : "0",
-    //     item_reviews: totalReviews,
-    //   };
-    // });
+    let ids = itemsIds.map((r: any) => r.id);
+
+    let items = await AppDataSource.getRepository(Items)
+      .createQueryBuilder("items")
+      .leftJoinAndSelect("items.reviews", "reviews")
+      .leftJoinAndSelect("items.chef", "chef")
+      .where("items.id IN (:...ids)", { ids })
+      .getMany();
 
     res.status(200).json({
       status: 0,
@@ -276,7 +272,7 @@ const getNearestItemsbyAvailability = async (req: any, res: any, next: any) => {
 
     res.status(400).json({
       status: 1,
-      message: error.messages,
+      message: error.message,
     });
   }
 };
