@@ -27,7 +27,12 @@ var storage = multer.diskStorage({
   },
 });
 
-var upload = multer({ storage: storage }).fields([
+var upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024 * 10, // set limit to 10 MB
+  },
+}).fields([
   {
     name: "image",
     maxCount: 1,
@@ -41,5 +46,10 @@ var upload = multer({ storage: storage }).fields([
 router.post("/api/chef", auth, upload, chefsController.createChef);
 router.get("/api/chefs", auth, chefsController.getChefs);
 router.patch("/api/chef/:id", auth, upload, chefsController.updateChef);
-router.get("/api/chef/day/distance", auth, upload, chefsController.getChefBydateDistance);
+router.get(
+  "/api/chef/day/distance",
+  auth,
+  upload,
+  chefsController.getChefBydateDistance
+);
 export { router as chefsRouter };

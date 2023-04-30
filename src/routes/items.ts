@@ -24,6 +24,9 @@ const storage = multer.diskStorage({
 
 const multi_upload = multer({
   storage,
+  limits: {
+    fileSize: 1024 * 1024 * 70, // set limit to 70 MB
+  },
 }).array("images", 7);
 
 const upload = (req: any, res: any, next: any) => {

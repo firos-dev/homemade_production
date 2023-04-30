@@ -14,14 +14,19 @@ var storage = multer.diskStorage({
   },
   filename: function (req, file, callback) {
     const ext = /[.]/.exec(file.originalname)
-      ? /[^.]+$/.exec(file.originalname) 
+      ? /[^.]+$/.exec(file.originalname)
       : undefined;
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     callback(null, uniqueSuffix + "." + ext);
   },
 });
 
-var upload = multer({ storage: storage }).single("image");
+var upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024 * 10, // set limit to 10 MB
+  },
+}).single("image");
 
 router.post("/api/customer", auth, customerController.createCustomer);
 router.get("/api/customers", auth, customerController.getCustomers);

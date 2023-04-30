@@ -1,5 +1,4 @@
 import { Items } from "../modules/Items";
-import multer from "multer";
 import uploadFile from "../helpers/s3";
 import { promisify } from "util";
 import fs from "fs";
