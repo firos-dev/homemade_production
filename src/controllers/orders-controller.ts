@@ -141,7 +141,7 @@ const getOrders = async (req: any, res: any, next: any) => {
   }
 
   try {
-    let orders = await AppDataSource.getRepository(Orders)
+    let query = AppDataSource.getRepository(Orders)
       .createQueryBuilder("orders")
       .leftJoinAndSelect("orders.items", "items", "items.status != :is", {
         is: "Deleted",
@@ -166,8 +166,14 @@ const getOrders = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("orders.logs", "logs")
       .where(body)
       .andWhere("orders.order_status != :os", { os: "Deleted" })
-      .orderBy("orders.updated_at", "DESC")
-      .getMany();
+      .orderBy("orders.updated_at", "DESC");
+
+    if (offset) {
+      query.take(offset.take);
+      query.skip(offset.skip);
+    }
+
+    let orders: any = await query.getMany();
 
     // let orders: any = await Orders.find({
     //   where: { ...where },
@@ -378,6 +384,14 @@ const getCurrentOrder = async (req: any, res: any, next: any) => {
 };
 
 const getAllOrders = async (req: any, res: any, next: any) => {
+  const page = req.query.page || null;
+
+  const perPage = req.query.perPage || null;
+
+  const offset = {
+    skip: Number(page) * Number(perPage),
+    take: Number(perPage),
+  };
   const { delivery_partner_id, chef_id, user_id } = req.query;
   try {
     let whereClause: any;
@@ -390,10 +404,20 @@ const getAllOrders = async (req: any, res: any, next: any) => {
       ];
     } else if (user_id) {
       whereClause = [
-        { user_id, order_chef_status: "Created" },
-        { user_id, order_chef_status: "Preparing" },
-        { user_id, order_chef_status: "Processing" },
+        { user_id, order_status: "Created" },
+        { user_id, order_status: "Preparing" },
+        { user_id, order_status: "Processing" },
       ];
+    }else if(delivery_partner_id){
+      whereClause = [
+        { user_id, order_delivery_status: "Recieved" },
+        { user_id, order_delivery_status: "Accepted" },
+        { user_id, order_delivery_status: "Ready to pick" },
+        { user_id, order_delivery_status: "Collected" },
+        { user_id, order_delivery_status: "Ready to drop" },
+      ];
+    }else{
+      throw new Error("Invalid request")
     }
     const orders = await Orders.find({
       where: whereClause,
@@ -406,6 +430,7 @@ const getAllOrders = async (req: any, res: any, next: any) => {
         "chef.user",
         "logs",
       ],
+      ...offset,
     });
     res.status(200).json({
       status: 0,

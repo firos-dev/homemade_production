@@ -54,7 +54,6 @@ export const validateOtp = async (user_id: string, otp: string) => {
     .andWhere("otp_master.status = :status", { status: "Active" })
     .andWhere("otp_master.otp_code = :otp", { otp })
     .getOne();
-  console.log(isValid);
 
   if (!isValid) {
     throw Error("Invalid otp");
