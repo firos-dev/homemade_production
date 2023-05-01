@@ -44,6 +44,7 @@ import { bannersRouter } from "./routes/banners";
 import { IdMaster } from "./modules/IdMaster";
 import { idMasterRouter } from "./routes/idmaster";
 import { Invoices } from "./modules/Invoices";
+import { commonRouter } from "./routes/common";
 
 require("dotenv").config();
 const app = express();
@@ -125,6 +126,7 @@ export const AppDataSource = new DataSource({
   app.use(paymentRouter);
   app.use(bannersRouter);
   app.use(idMasterRouter);
+  app.use(commonRouter)
   app.use((error: any, req: any, res: any, next: any) => {
     if (req.file) {
       fs.unlink(req.file.path, (err) => {

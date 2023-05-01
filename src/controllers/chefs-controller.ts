@@ -531,4 +531,5 @@ function deg2rad(degrees: any) {
   return (degrees * Math.PI) / 180;
 }
 
+
 export default { createChef, getChefs, updateChef, getChefBydateDistance };

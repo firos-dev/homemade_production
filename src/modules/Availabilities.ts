@@ -12,9 +12,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { Roles } from "./Roles";
-import { Dietries } from "./Dietries";
-import { Locations } from "./Locations";
 import { Chefs } from "./Chefs";
 @Entity("availabilities")
 export class Availabilities extends BaseEntity {

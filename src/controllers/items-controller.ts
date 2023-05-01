@@ -226,13 +226,13 @@ const getNearestItemsbyAvailability = async (req: any, res: any, next: any) => {
     delete body.perPage;
   }
   let days = [
+    "sunday",
     "monday",
     "tuesday",
     "wednesday",
     "thursday",
     "friday",
     "saturday",
-    "sunday",
   ];
   const { latitude, longitude, day } = req.query;
 
