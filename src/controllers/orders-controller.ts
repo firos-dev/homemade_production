@@ -65,12 +65,13 @@ const createOrder = async (req: any, res: any, next: any) => {
 
     await order.save().then(async () => {
       const orderItems: any = await Promise.all(
-        items.map(async (id: any) => {
-          const item: any = await Items.findOne({ where: { id } });
+        items.map(async (cart: any) => {
+          const item: any = await Items.findOne({ where: { id: cart.item_id } });
           let i = {
             ...item,
             order_id: order.id,
             item_id: item.id,
+            quantity: cart.quantity
           };
           delete i.id;
           return i;
