@@ -1,3 +1,4 @@
+import { Status } from "../helpers/enums";
 import { Chefs } from "./Chefs";
 import { DeliveryPartners } from "./DeliveryPartners";
 import { Items } from "./Items";
@@ -81,6 +82,13 @@ export class Reviews extends BaseEntity {
     type: "numeric"
   })
   star_count: string;
+
+  @Column({
+    type: "enum",
+    enum: Status,
+    default: Status.ACTIVE
+  })
+  status: Status;
 
   @CreateDateColumn()
   created_at: Date;

@@ -66,12 +66,14 @@ const createOrder = async (req: any, res: any, next: any) => {
     await order.save().then(async () => {
       const orderItems: any = await Promise.all(
         items.map(async (cart: any) => {
-          const item: any = await Items.findOne({ where: { id: cart.item_id } });
+          const item: any = await Items.findOne({
+            where: { id: cart.item_id },
+          });
           let i = {
             ...item,
             order_id: order.id,
             item_id: item.id,
-            quantity: cart.quantity
+            quantity: cart.quantity,
           };
           delete i.id;
           return i;
@@ -234,21 +236,21 @@ const updateOrder = async (req: any, res: any, next: any) => {
       where: { id: order.chef_id },
       relations: ["user", "drop_off_point"],
     });
-
-    const deliveryLocation: any = await Locations.findOne({
-      where: { id: order.delivery_location_id },
-    });
-    let lat1 = chef.drop_off_point.latitude;
-    let long1 = chef.drop_off_point.longitude;
-    let lat2 = deliveryLocation.latitude;
-    let long2 = deliveryLocation.longitude;
-    let distance: any = await calculateDistance(lat1, long1, lat2, long2);
-    distance = distance.toFixed(2);
     let body: any = req.body;
-    body = {
-      ...body,
-      distance,
-    };
+
+    // const deliveryLocation: any = await Locations.findOne({
+    //   where: { id: order.delivery_location_id },
+    // });
+    // let lat1 = chef.drop_off_point.latitude;
+    // let long1 = chef.drop_off_point.longitude;
+    // let lat2 = deliveryLocation.latitude;
+    // let long2 = deliveryLocation.longitude;
+    // let distance: any = await calculateDistance(lat1, long1, lat2, long2);
+    // distance = distance.toFixed(2);
+    // body = {
+    //   ...body,
+    //   distance,
+    // };
     console.log(body);
 
     const updateResult = await AppDataSource.getRepository(Orders)
@@ -409,7 +411,7 @@ const getAllOrders = async (req: any, res: any, next: any) => {
         { user_id, order_status: "Preparing" },
         { user_id, order_status: "Processing" },
       ];
-    }else if(delivery_partner_id){
+    } else if (delivery_partner_id) {
       whereClause = [
         { user_id, order_delivery_status: "Recieved" },
         { user_id, order_delivery_status: "Accepted" },
@@ -417,8 +419,8 @@ const getAllOrders = async (req: any, res: any, next: any) => {
         { user_id, order_delivery_status: "Collected" },
         { user_id, order_delivery_status: "Ready to drop" },
       ];
-    }else{
-      throw new Error("Invalid request")
+    } else {
+      throw new Error("Invalid request");
     }
     const orders = await Orders.find({
       where: whereClause,

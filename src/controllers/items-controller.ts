@@ -103,14 +103,27 @@ const getItems = async (req: any, res: any, next: any) => {
     delete body.page;
     delete body.perPage;
   }
-  let relations = ["chef", "chef.user", "reviews", "chef.reviews"];
   try {
-    let items = await Items.find({
-      where: body,
-      ...offset,
-      relations,
-      order: { created_at: "DESC" },
-    });
+    let query = AppDataSource.getRepository(Items)
+      .createQueryBuilder("items")
+      .leftJoinAndSelect("items.reviews", "reviews", "reviews.status != :rs", {
+        rs: "Deleted",
+      })
+      .leftJoinAndSelect("items.chef", "chef")
+      .leftJoinAndSelect("chef.user", "user")
+      .leftJoinAndSelect(
+        "chef.reviews",
+        "chefReviews",
+        "chefReviews.status != :crf",
+        {
+          crf: "Deleted",
+        }
+      )
+      .where(body)
+      .andWhere("items.status != :is", { is: "Deleted" })
+      .orderBy("items.updated_at", "DESC");
+
+    let items = await query.getMany();
 
     items = items.map((item: any) => {
       let totalReviews = item.reviews.length;
@@ -148,7 +161,7 @@ const updateItem = async (req: any, res: any, next: any) => {
     let images: any = [];
     let imageKeys: any = [];
 
-    if (imageArr.length > 0) {
+    if (imageArr?.length > 0) {
       await Promise.all(
         imageArr.map(async (image: any) => {
           let imageResult = await uploadFile(
