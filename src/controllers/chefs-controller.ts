@@ -269,7 +269,7 @@ const getChefs = async (req: any, res: any, next: any) => {
 
     res.status(400).json({
       status: 1,
-      message: error.messages,
+      message: error.message,
     });
   }
 };

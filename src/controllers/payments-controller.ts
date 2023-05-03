@@ -11,7 +11,7 @@ const addBankAccount = async (req: any, res: any, next: any) => {
 
     res.status(400).json({
       status: 1,
-      message: error.messages,
+      message: error.message,
     });
   }
 };
@@ -34,7 +34,7 @@ const getBankAccount = async (req: any, res: any, next: any) => {
 
     res.status(400).json({
       status: 1,
-      message: error.messages,
+      message: error.message,
     });
   }
 };
@@ -49,7 +49,7 @@ const addPaymentMethod = async (req: any, res: any, next: any) => {
 
     res.status(400).json({
       status: 1,
-      message: error.messages,
+      message: error.message,
     });
   }
 };
@@ -71,7 +71,7 @@ const getPaymentMethod = async (req: any, res: any, next: any) => {
 
     res.status(400).json({
       status: 1,
-      message: error.messages,
+      message: error.message,
     });
   }
 };
@@ -88,7 +88,7 @@ const getEarnings = async (req: any, res: any, next: any) => {
 
     res.status(400).json({
       status: 1,
-      message: error.messages,
+      message: error.message,
     });
   }
 };

@@ -123,6 +123,11 @@ const getItems = async (req: any, res: any, next: any) => {
       .andWhere("items.status != :is", { is: "Deleted" })
       .orderBy("items.updated_at", "DESC");
 
+      if (offset) {
+        query.take(offset.take);
+        query.skip(offset.skip);
+      }
+
     let items = await query.getMany();
 
     items = items.map((item: any) => {
@@ -148,7 +153,7 @@ const getItems = async (req: any, res: any, next: any) => {
 
     res.status(400).json({
       status: 1,
-      message: error.messages,
+      message: error.message,
     });
   }
 };
