@@ -95,6 +95,7 @@ const getRecentData = async (req: any, res: any, next: any) => {
       .createQueryBuilder("orders")
       .leftJoinAndSelect("orders.user", "user")
       .leftJoinAndSelect("orders.chef", "chef")
+      .leftJoinAndSelect("orders.delivery_location", "delivery_location")
       .where("orders.order_status != :os", { os: "Deleted" })
       .orderBy("orders.created_at", "DESC")
       .take(offset.take)
