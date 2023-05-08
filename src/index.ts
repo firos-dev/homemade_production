@@ -45,6 +45,8 @@ import { IdMaster } from "./modules/IdMaster";
 import { idMasterRouter } from "./routes/idmaster";
 import { Invoices } from "./modules/Invoices";
 import { commonRouter } from "./routes/common";
+import { Settings } from "./modules/Settings";
+import { settingsRouter } from "./routes/settings";
 
 require("dotenv").config();
 const app = express();
@@ -86,7 +88,8 @@ export const AppDataSource = new DataSource({
     Reviews,
     Banners,
     IdMaster,
-    Invoices
+    Invoices,
+    Settings,
   ],
   synchronize: true,
 });
@@ -126,7 +129,8 @@ export const AppDataSource = new DataSource({
   app.use(paymentRouter);
   app.use(bannersRouter);
   app.use(idMasterRouter);
-  app.use(commonRouter)
+  app.use(commonRouter);
+  app.use(settingsRouter);
   app.use((error: any, req: any, res: any, next: any) => {
     if (req.file) {
       fs.unlink(req.file.path, (err) => {

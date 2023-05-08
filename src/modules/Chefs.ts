@@ -141,14 +141,15 @@ export class Chefs extends BaseEntity {
 
   @Column({
     nullable: true,
+    default: '10'
   })
-  homemade_commission: String;
+  commission: String;
 
   @Column({
     type: 'boolean',
     default: true,
   })
-  commission_editable: Boolean;
+  commission_single_change: Boolean;
 
   @Column({
     type: "boolean",

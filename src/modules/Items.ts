@@ -102,6 +102,17 @@ export class Items extends BaseEntity {
   type: string;
 
   @Column({
+    type: "boolean",
+    default: false,
+  })
+  express_item: boolean;
+
+  @Column({
+    nullable: true,
+  })
+  cooking_time: string;
+
+  @Column({
     type: "enum",
     enum: Status,
   })

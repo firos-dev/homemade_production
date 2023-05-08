@@ -33,6 +33,8 @@ const createItem = async (req: any, res: any, next: any) => {
     allergic_ingredients,
     type,
     status,
+    cooking_time,
+    express_item
   } = req.body;
 
   try {
@@ -69,6 +71,8 @@ const createItem = async (req: any, res: any, next: any) => {
       allergic_ingredients,
       type,
       status,
+      cooking_time,
+      express_item
     });
     if (!chef_id) {
       throw new Error("Chef ID required");

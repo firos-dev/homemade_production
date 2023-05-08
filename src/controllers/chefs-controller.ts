@@ -9,6 +9,7 @@ import fs from "fs";
 import { AppDataSource } from "../";
 import { OrderChefStatus } from "./../helpers/enums";
 import { Not } from "typeorm";
+import { Settings } from "../modules/Settings";
 const unlinkAsync = promisify(fs.unlink);
 
 const createChef = async (req: any, res: any, next: any) => {
@@ -58,6 +59,10 @@ const createChef = async (req: any, res: any, next: any) => {
   try {
     const chefData = await Chefs.findOne({
       where: { user_id },
+    });
+
+    const commission: any = await Settings.findOne({
+      where: { name: "chef_commission" },
     });
 
     if (chefData) {
@@ -119,7 +124,7 @@ const createChef = async (req: any, res: any, next: any) => {
         user_type: UserType.CHEF,
       }
     );
-    let chef;
+    let chef: any;
     chef = Chefs.create({
       user_id,
       bio,
@@ -135,6 +140,8 @@ const createChef = async (req: any, res: any, next: any) => {
       certificate_file: certificateUrl,
       certificate_key: certificateKey,
       certificate_number,
+      commission: commission.value,
+      commission_single_change: true,
     });
     await chef.save();
 
@@ -310,6 +317,8 @@ const updateChef = async (req: any, res: any, next: any) => {
     "certificate_file",
     "status",
     "verified",
+    "commission",
+    "commission_single_change",
   ];
 
   const keys = Object.keys(req.body);
@@ -409,6 +418,21 @@ const updateChef = async (req: any, res: any, next: any) => {
 
 const getChefBydateDistance = async (req: any, res: any, next: any) => {
   const { latitude, longitude, day } = req.query;
+  const page = req.query.page || null;
+
+  const perPage = req.query.perPage || null;
+
+  const offset = {
+    skip: Number(page) * Number(perPage),
+    take: Number(perPage),
+  };
+
+  let body = req.query;
+
+  if (body.page || body.perPage) {
+    delete body.page;
+    delete body.perPage;
+  }
   let relations = [
     "user",
     "cuisine",
@@ -419,34 +443,57 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
     "availability",
   ];
 
-  if (req.body.includeFollowing) {
-    relations.push("user.following");
-  }
-  if (req.body.includeFollowers) {
-    relations.push("user.followers");
-  }
+  let days = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
 
   try {
+    if (!latitude || !longitude || !day || !days.includes(day)) {
+      throw new Error("Invalid request");
+    }
+
+    const chefIds = await AppDataSource.query(`SELECT c.id,
+      ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC)) ) 
+        * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+        * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) AS distance
+      FROM chefs c
+      JOIN locations l ON c.drop_off_point_id = l.id
+      JOIN availabilities a ON a.chef_id = c.id
+      WHERE a.${day} = true AND c.status != 'Deleted' AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
+        * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+        * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) < 50
+      ORDER BY distance
+      LIMIT ${offset.take} OFFSET ${offset.skip}`);
+
+    let ids = chefIds.map((r: any) => r.id);
+
+    if (ids.length < 1) {
+      res.status(200).json({
+        status: 0,
+        data: [],
+      });
+      return;
+    }
     let chefs: any = await AppDataSource.getRepository(Chefs)
       .createQueryBuilder("chefs")
       .leftJoinAndSelect("chefs.user", "user")
+      .leftJoinAndSelect("chefs.items", "items")
+      .leftJoinAndSelect("chefs.drop_off_point", "drop_off_point")
+      .leftJoinAndSelect("items.reviews", "reviews")
+      .leftJoinAndSelect("chefs.availability", "availability")
       .leftJoinAndSelect("chefs.cuisine", "cuisine")
       .leftJoinAndSelect("chefs.spicy_level", "spicy_level")
       .leftJoinAndSelect("chefs.dietry", "dietry")
-      .leftJoinAndSelect("chefs.drop_off_point", "drop_off_point")
-      .leftJoinAndSelect("chefs.availability", "availability")
-      .leftJoinAndSelect("chefs.reviews", "reviews")
-      .leftJoinAndSelect("chefs.orders", "orders")
-      .leftJoinAndSelect("chefs.items", "items")
-      .leftJoinAndSelect("items.reviews", "item_reviews")
-      .where(`availability.${day} = ${true}`)
-      .where(`chefs.status != :st`, { st: "Deleted" })
+      .where("chefs.id IN (:...ids)", { ids })
       .getMany();
 
     chefs = chefs.map((chef: any) => {
-      let completed = chef.orders.filter(
-        (order: any) => order.order_chef_status === OrderChefStatus.COMPLETED
-      );
       let chefStars: any = [];
       let items = chef.items.map((item: any) => {
         let totalReviews = item.reviews.length;
@@ -471,32 +518,20 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
         chef_star: chefStar ? chefStar.toFixed(2) : "0",
         chef_reviews: reviewsCount,
         items,
-        deliveries: completed.length,
       };
     });
-
-    chefs = chefs
-      ?.filter((a: any) => a.drop_off_point)
-      .map((chef: any) => {
-        return {
-          ...chef,
-          lat: chef.drop_off_point.latitude,
-          long: chef.drop_off_point.longitude,
-        };
-      });
 
     if (!chefs.length) {
       res.status(200).json({
         status: 0,
         data: [],
       });
+      return;
     }
-
-    const sortedData = sortByNearest(latitude, longitude, chefs);
 
     res.status(200).json({
       status: 0,
-      data: sortedData,
+      data: chefs,
     });
   } catch (error) {
     console.log(error);
@@ -530,6 +565,5 @@ function sortByNearest(lat: any, long: any, data: any) {
 function deg2rad(degrees: any) {
   return (degrees * Math.PI) / 180;
 }
-
 
 export default { createChef, getChefs, updateChef, getChefBydateDistance };

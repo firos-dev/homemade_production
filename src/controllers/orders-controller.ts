@@ -360,18 +360,22 @@ const getCurrentOrder = async (req: any, res: any, next: any) => {
         { order_delivery_status: "Ready to drop" },
       ];
     }
-    const delivery = await Orders.find({
-      where: whereClause,
-      relations: [
-        "items",
-        "user",
-        "delivery_location",
-        "chef",
-        "chef.drop_off_point",
-        "chef.user",
-        "logs",
-      ],
-    });
+
+    let query = AppDataSource.getRepository(Orders)
+      .createQueryBuilder("orders")
+      .leftJoinAndSelect("orders.items", "items")
+      .leftJoinAndSelect("orders.user", "user")
+      .leftJoinAndSelect("orders.delivery_location", "delivery_location")
+      .leftJoinAndSelect("orders.chef", "chef")
+      .leftJoinAndSelect("orders.logs", "logs")
+      .leftJoinAndSelect("chef.user", "chefUser")
+      .leftJoinAndSelect("chef.drop_off_point", "drop_off_point")
+      .orderBy("logs.created_at", "ASC")
+      .orderBy("orders.updated_at", "DESC")
+      .where(whereClause);
+
+    const delivery = await query.getMany();
+
     res.status(200).json({
       status: 0,
       data: delivery,
@@ -422,19 +426,27 @@ const getAllOrders = async (req: any, res: any, next: any) => {
     } else {
       throw new Error("Invalid request");
     }
-    const orders = await Orders.find({
-      where: whereClause,
-      relations: [
-        "items",
-        "user",
-        "delivery_location",
-        "chef",
-        "chef.drop_off_point",
-        "chef.user",
-        "logs",
-      ],
-      ...offset,
-    });
+
+    let query = AppDataSource.getRepository(Orders)
+      .createQueryBuilder("orders")
+      .leftJoinAndSelect("orders.items", "items")
+      .leftJoinAndSelect("orders.user", "user")
+      .leftJoinAndSelect("orders.delivery_location", "delivery_location")
+      .leftJoinAndSelect("orders.chef", "chef")
+      .leftJoinAndSelect("orders.logs", "logs")
+      .leftJoinAndSelect("chef.user", "chefUser")
+      .leftJoinAndSelect("chef.drop_off_point", "drop_off_point")
+      .orderBy("logs.created_at", "ASC")
+      .orderBy("orders.updated_at", "DESC")
+      .where(whereClause);
+
+    if (offset.take) {
+      query.skip(offset.skip);
+      query.take(offset.take);
+    }
+
+    const orders = await query.getMany();
+
     res.status(200).json({
       status: 0,
       data: orders,
