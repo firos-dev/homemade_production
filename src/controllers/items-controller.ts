@@ -123,10 +123,10 @@ const getItems = async (req: any, res: any, next: any) => {
       .andWhere("items.status != :is", { is: "Deleted" })
       .orderBy("items.updated_at", "DESC");
 
-      if (offset) {
-        query.take(offset.take);
-        query.skip(offset.skip);
-      }
+    if (offset) {
+      query.take(offset.take);
+      query.skip(offset.skip);
+    }
 
     let items = await query.getMany();
 
@@ -278,8 +278,24 @@ const getNearestItemsbyAvailability = async (req: any, res: any, next: any) => {
       .createQueryBuilder("items")
       .leftJoinAndSelect("items.reviews", "reviews")
       .leftJoinAndSelect("items.chef", "chef")
+      .leftJoinAndSelect("chef.user", "user")
       .where("items.id IN (:...ids)", { ids })
       .getMany();
+
+
+      items = items.map((item: any) => {
+        let totalReviews = item.reviews.length;
+        let reviewSum = item.reviews.reduce(
+          (a: any, b: any) => a + Number(b.star_count),
+          0
+        );
+        let itemStar = reviewSum / totalReviews;
+        return {
+          ...item,
+          item_star: itemStar ? itemStar.toFixed(1) : "0",
+          item_reviews: totalReviews,
+        };
+      });
 
     res.status(200).json({
       status: 0,

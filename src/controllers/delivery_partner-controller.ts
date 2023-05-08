@@ -174,7 +174,7 @@ const getDeliveryPartners = async (req: any, res: any, next: any) => {
   body = {
     ...body,
     ...req.query,
-    status: Not("Deleted")
+    status: Not("Deleted"),
   };
 
   if (body.page || body.perPage) {
@@ -327,25 +327,7 @@ const updateDeliveryPartnerUser = async (req: any, res: any, next: any) => {
 const updateDeliveryPartner = async (req: any, res: any, next: any) => {
   const { id } = req.params;
 
-  const updates = Object.keys(req.body);
-  const allowedUpdates = [
-    "image",
-    "terms_accepted",
-    "licence_file",
-    "licence_number",
-    "online",
-    "verified",
-    "status",
-  ];
-
-  const isValidOperation = updates.every((update) =>
-    allowedUpdates.includes(update)
-  );
-
   try {
-    if (!isValidOperation) {
-      throw new Error("Invalid updates!");
-    }
 
     await DeliveryPartners.update({ id: id }, { ...req.body });
 

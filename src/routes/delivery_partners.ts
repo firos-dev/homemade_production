@@ -55,6 +55,7 @@ router.get(
 router.patch(
   "/api/delivery_partner/:id",
   auth,
+  upload,
   deliveryPartnerController.updateDeliveryPartner
 );
 router.patch(
