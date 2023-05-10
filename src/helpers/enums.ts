@@ -14,6 +14,7 @@ export enum AddressType {
 
 export enum OrderStatus {
   CREATED = "Created",
+  ACCEPTED = "Accepted",
   PREPARING = "Preparing",
   REJECTED = "Rejected",
   CANCELLED = "Cancelled",

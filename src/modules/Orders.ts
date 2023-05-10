@@ -107,7 +107,7 @@ export class Orders extends BaseEntity {
 
   @Column({
     type: "boolean",
-    default: false
+    default: false,
   })
   delivery_charge_excluded: Boolean;
 
@@ -143,6 +143,12 @@ export class Orders extends BaseEntity {
     nullable: true,
   })
   distance: string;
+
+  @Column({
+    type: "boolean",
+    default: false,
+  })
+  express_order: Boolean;
 
   @Column({
     type: "boolean",

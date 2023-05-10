@@ -28,6 +28,7 @@ const createOrder = async (req: any, res: any, next: any) => {
     delivery_time,
     delivery_location_id,
     instructions,
+    express_order,
   } = req.body;
   try {
     if (!user_id) {
@@ -60,6 +61,7 @@ const createOrder = async (req: any, res: any, next: any) => {
       order_chef_status: OrderChefStatus.RECIEVED,
       delivery_location_id,
       instructions,
+      express_order,
       distance,
     });
 
@@ -230,6 +232,7 @@ const updateOrder = async (req: any, res: any, next: any) => {
         "chef.user",
         "delivery_partner",
         "delivery_partner.user",
+        "express_order",
       ],
     });
     const chef: any = await Chefs.findOne({
