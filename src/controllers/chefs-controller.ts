@@ -140,7 +140,7 @@ const createChef = async (req: any, res: any, next: any) => {
       certificate_file: certificateUrl,
       certificate_key: certificateKey,
       certificate_number,
-      commission: commission.value,
+      commission: commission?.value,
       commission_single_change: true,
     });
     await chef.save();
@@ -470,7 +470,7 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
         * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) < 50
       ORDER BY distance
       LIMIT ${offset.take} OFFSET ${offset.skip}`);
-
+    
     let ids = chefIds.map((r: any) => r.id);
 
     if (ids.length < 1) {
