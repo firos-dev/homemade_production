@@ -6,8 +6,13 @@ import { connectedUser, io } from "./../index";
 console.log(connectedUser);
 
 router.post("/api/order", auth, ordersController.createOrder);
-router.get("/api/order", auth, ordersController.getOrders);
 router.patch("/api/order/:id", auth, ordersController.updateOrder);
+router.patch(
+  "/api/delivery/order/accept/:id",
+  auth,
+  ordersController.deliveryPartnerAllocation
+);
+router.get("/api/order", auth, ordersController.getOrders);
 router.get("/api/current/order", auth, ordersController.getCurrentOrder);
 router.get("/api/deliveries/count", auth, ordersController.getDeliveriesCount);
 router.get(

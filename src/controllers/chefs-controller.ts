@@ -10,6 +10,7 @@ import { AppDataSource } from "../";
 import { OrderChefStatus } from "./../helpers/enums";
 import { Not } from "typeorm";
 import { Settings } from "../modules/Settings";
+import { Availabilities } from "../modules/Availabilities";
 const unlinkAsync = promisify(fs.unlink);
 
 const createChef = async (req: any, res: any, next: any) => {
@@ -37,6 +38,13 @@ const createChef = async (req: any, res: any, next: any) => {
     city,
     zip_code,
     country,
+    sunday,
+    monday,
+    tuesday,
+    wednesday,
+    thursday,
+    friday,
+    saturday,
   } = req.body;
 
   let locationUpdate = [
@@ -163,6 +171,17 @@ const createChef = async (req: any, res: any, next: any) => {
       await location.save();
     }
 
+    const avail = Availabilities.create({
+      chef_id: chef.id,
+      sunday,
+      monday,
+      tuesday,
+      wednesday,
+      thursday,
+      friday,
+      saturday,
+    });
+    await avail.save();
     res.status(201).json({
       status: 0,
       message: "Record has been successfully saved",
@@ -433,15 +452,6 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
     delete body.page;
     delete body.perPage;
   }
-  let relations = [
-    "user",
-    "cuisine",
-    "spicy_level",
-    "dietry",
-    "user.locations",
-    "drop_off_point",
-    "availability",
-  ];
 
   let days = [
     "sunday",
@@ -465,12 +475,13 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       FROM chefs c
       JOIN locations l ON c.drop_off_point_id = l.id
       JOIN availabilities a ON a.chef_id = c.id
-      WHERE a.${day} = true AND c.status != 'Deleted' AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
+      INNER JOIN items ON c.id = items.chef_id
+      WHERE a.${day} = true AND c.status != 'Deleted' AND c.status != 'Inactive' AND chef.verified=true AND items.id IS NOT NULL AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
         * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
         * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) < 50
       ORDER BY distance
       LIMIT ${offset.take} OFFSET ${offset.skip}`);
-    
+
     let ids = chefIds.map((r: any) => r.id);
 
     if (ids.length < 1) {
@@ -543,27 +554,6 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
   }
 };
 
-function sortByNearest(lat: any, long: any, data: any) {
-  const EARTH_RADIUS_KM = 6371; // Earth's radius in kilometers
-  const sortedData = data
-    .map((item: any) => {
-      const dLat = deg2rad(item.lat - lat);
-      const dLong = deg2rad(item.long - long);
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(deg2rad(lat)) *
-          Math.cos(deg2rad(item.lat)) *
-          Math.sin(dLong / 2) *
-          Math.sin(dLong / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const distance = EARTH_RADIUS_KM * c;
-      return { ...item, distance };
-    })
-    .sort((a: any, b: any) => a.distance - b.distance);
-  return sortedData;
-}
-function deg2rad(degrees: any) {
-  return (degrees * Math.PI) / 180;
-}
+
 
 export default { createChef, getChefs, updateChef, getChefBydateDistance };
