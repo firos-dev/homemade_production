@@ -6,6 +6,7 @@ import uploadFile from "../helpers/s3";
 import { promisify } from "util";
 import fs from "fs";
 import { Not } from "typeorm";
+import { AppDataSource } from "../";
 const unlinkAsync = promisify(fs.unlink);
 const createCustomer = async (req: any, res: any, next: any) => {
   const {
@@ -131,31 +132,34 @@ const getCustomers = async (req: any, res: any, next: any) => {
   body = {
     ...body,
     ...req.query,
-    status: Not("Deleted")
   };
 
   if (body.page || body.perPage) {
     delete body.page;
     delete body.perPage;
   }
-  let relations = ["user", "user.locations"];
-
-  if (req.body.includeFollowing) {
-    relations.push("user.following");
-  }
-  if (req.body.includeFollowers) {
-    relations.push("user.followers");
-  }
+  
   try {
-    const customers = await Customers.find({
-      where: body,
-      ...offset,
-      relations,
-      order: { created_at: "DESC" },
-    });
+    let query = AppDataSource.getRepository(Customers)
+      .createQueryBuilder("customers")
+      .leftJoinAndSelect("customers.user", "user")
+      .leftJoinAndSelect("user.locations", "locations")
+      .where(body)
+      .andWhere({ status: Not("Deleted") })
+      .orderBy("customers.created_at", "DESC");
+
+    if (offset) {
+      query.take(offset.take);
+      query.skip(offset.skip);
+    }
+
+    let result: any = await query.getManyAndCount();
+    let [customers, count] = result;
+
     res.status(200).json({
       status: 0,
       data: customers,
+      count,
     });
   } catch (error) {
     console.log(error);
