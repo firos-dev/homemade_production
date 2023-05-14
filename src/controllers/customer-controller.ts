@@ -138,7 +138,7 @@ const getCustomers = async (req: any, res: any, next: any) => {
     delete body.page;
     delete body.perPage;
   }
-  
+
   try {
     let query = AppDataSource.getRepository(Customers)
       .createQueryBuilder("customers")
@@ -182,6 +182,7 @@ const updateCustomer = async (req: any, res: any, next: any) => {
     mobile,
     user_type,
     terms_accepted,
+    status,
   } = req.body;
 
   let userUpdate = [
@@ -237,7 +238,7 @@ const updateCustomer = async (req: any, res: any, next: any) => {
     if (customerValues) {
       await Customers.update(
         { id },
-        { image: imageUrl, image_key: imageKey, terms_accepted }
+        { image: imageUrl, image_key: imageKey, terms_accepted, status}
       );
     }
 
