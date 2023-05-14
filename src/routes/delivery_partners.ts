@@ -18,7 +18,22 @@ var storage = multer.diskStorage({
     if (file.fieldname === "image") {
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
       callback(null, uniqueSuffix + "." + ext);
-    } else if (file.fieldname === "licence_file") {
+    } else if (file.fieldname === "licence_front") {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      callback(null, uniqueSuffix + "." + ext);
+    } else if (file.fieldname === "licence_back") {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      callback(null, uniqueSuffix + "." + ext);
+    } else if (file.fieldname === "car_front_image") {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      callback(null, uniqueSuffix + "." + ext);
+    } else if (file.fieldname === "car_back_image") {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      callback(null, uniqueSuffix + "." + ext);
+    } else if (file.fieldname === "id_card_front") {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      callback(null, uniqueSuffix + "." + ext);
+    } else if (file.fieldname === "id_card_back") {
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
       callback(null, uniqueSuffix + "." + ext);
     }
@@ -36,7 +51,27 @@ var upload = multer({
     maxCount: 1,
   },
   {
-    name: "licence_file",
+    name: "licence_front",
+    maxCount: 1,
+  },
+  {
+    name: "licence_back",
+    maxCount: 1,
+  },
+  {
+    name: "car_front_image",
+    maxCount: 1,
+  },
+  {
+    name: "car_back_image",
+    maxCount: 1,
+  },
+  {
+    name: "id_card_front",
+    maxCount: 1,
+  },
+  {
+    name: "id_card_back",
     maxCount: 1,
   },
 ]);

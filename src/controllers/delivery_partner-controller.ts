@@ -8,7 +8,6 @@ import { promisify } from "util";
 import fs from "fs";
 import { AppDataSource } from "../";
 import { Not } from "typeorm";
-import { Orders } from "../modules/Orders";
 const unlinkAsync = promisify(fs.unlink);
 
 const createDeliveryPartner = async (req: any, res: any, next: any) => {
@@ -30,6 +29,8 @@ const createDeliveryPartner = async (req: any, res: any, next: any) => {
     city,
     zip_code,
     country,
+    car_registration,
+    nationality,
   } = req.body;
 
   let userUpdate = [
@@ -45,6 +46,8 @@ const createDeliveryPartner = async (req: any, res: any, next: any) => {
     "terms_accepted",
     "licence_file",
     "licence_number",
+    "car_registration",
+    "nationality",
   ];
   let locationUpdate = [
     "address_line_one",
@@ -59,40 +62,121 @@ const createDeliveryPartner = async (req: any, res: any, next: any) => {
   ];
   const keys = Object.keys(req.body);
   let imageKey, imageUrl;
-  let licenceKey, licenceUrl;
+  let licenceFrontKey, licenceFrontUrl;
+  let licenceBackKey, licenceBackUrl;
+  let carFrontKey, carBackUrl;
+  let carBackKey, carFrontUrl;
+  let idCardFrontKey, idCardFrontUrl;
+  let idCardBackKey, idCardBackUrl;
 
   try {
-    const { image, licence_file } = req.files;
+    const {
+      image,
+      licence_front,
+      licence_back,
+      car_front_image,
+      car_back_image,
+      id_card_front,
+      id_card_back,
+    } = req.files;
 
     let imageUploaded = image && image !== "undefined";
+    let licenceFrontUploaded = licence_front && licence_front !== "undefined";
+    let licenceBackUploaded = licence_back && licence_back !== "undefined";
+    let carFrontUploaded = car_front_image && car_front_image !== "undefined";
+    let carBackUploaded = car_back_image && car_back_image !== "undefined";
+    let idCardFrontUploaded = id_card_front && id_card_front !== "undefined";
+    let idCardBackUploaded = id_card_back && id_card_back !== "undefined";
 
-    let licenceUploaded = licence_file && licence_file !== "undefined";
+    if (imageUploaded) {
+      let imageResult = await uploadFile(
+        image[0],
+        `${user_id}/avatars/` + image[0].filename
+      );
 
-    if (imageUploaded || licenceUploaded) {
-      if (imageUploaded) {
-        let imageResult = await uploadFile(
-          image[0],
-          `${user_id}/avatars/` + image[0].filename
-        );
-
-        if (imageResult) {
-          imageKey = imageResult.Key;
-          imageUrl = imageResult.Location;
-        }
-        await unlinkAsync(image[0].path);
+      if (imageResult) {
+        imageKey = imageResult.Key;
+        imageUrl = imageResult.Location;
       }
-      if (licenceUploaded) {
-        let licenceResult = await uploadFile(
-          licence_file[0],
-          `${user_id}/certificates/` + licence_file[0].filename
-        );
+      await unlinkAsync(image[0].path);
+    }
 
-        if (licenceResult) {
-          licenceKey = licenceResult.Key;
-          licenceUrl = licenceResult.Location;
-        }
-        await unlinkAsync(licence_file[0].path);
+    if (licenceFrontUploaded) {
+      let licenceFrontResult = await uploadFile(
+        licence_front[0],
+        `${user_id}/certificates/` + licence_front[0].filename
+      );
+
+      if (licenceFrontResult) {
+        licenceFrontKey = licenceFrontResult.Key;
+        licenceFrontUrl = licenceFrontResult.Location;
       }
+      await unlinkAsync(licence_front[0].path);
+    }
+
+    if (licenceBackUploaded) {
+      let licenceBackResult = await uploadFile(
+        licence_back[0],
+        `${user_id}/certificates/` + licence_back[0].filename
+      );
+
+      if (licenceBackResult) {
+        licenceBackKey = licenceBackResult.Key;
+        licenceBackUrl = licenceBackResult.Location;
+      }
+      await unlinkAsync(licence_back[0].path);
+    }
+
+    if (carFrontUploaded) {
+      let carFrontResult = await uploadFile(
+        car_front_image[0],
+        `${user_id}/car_images/` + car_front_image[0].filename
+      );
+
+      if (carFrontResult) {
+        carFrontKey = carFrontResult.Key;
+        carFrontUrl = carFrontResult.Location;
+      }
+      await unlinkAsync(car_front_image[0].path);
+    }
+
+    if (carBackUploaded) {
+      let carBackResult = await uploadFile(
+        car_back_image[0],
+        `${user_id}/car_images/` + car_back_image[0].filename
+      );
+
+      if (carBackResult) {
+        carBackKey = carBackResult.Key;
+        carBackUrl = carBackResult.Location;
+      }
+      await unlinkAsync(car_back_image[0].path);
+    }
+
+    if (idCardFrontUploaded) {
+      let idCardFrontResult = await uploadFile(
+        id_card_front[0],
+        `${user_id}/id_cards/` + id_card_front[0].filename
+      );
+
+      if (idCardFrontResult) {
+        idCardFrontKey = idCardFrontResult.Key;
+        idCardFrontUrl = idCardFrontResult.Location;
+      }
+      await unlinkAsync(id_card_front[0].path);
+    }
+
+    if (idCardBackUploaded) {
+      let idCardBackResult = await uploadFile(
+        id_card_back[0],
+        `${user_id}/certificates/` + id_card_back[0].filename
+      );
+
+      if (idCardBackResult) {
+        idCardBackKey = idCardBackResult.Key;
+        idCardBackUrl = idCardBackResult.Location;
+      }
+      await unlinkAsync(id_card_back[0].path);
     }
 
     let userValues = keys.filter((value) => userUpdate.includes(value));
@@ -121,8 +205,16 @@ const createDeliveryPartner = async (req: any, res: any, next: any) => {
         image: imageUrl,
         image_key: imageKey,
         terms_accepted,
-        licence_key: licenceKey,
-        licence_file: licenceUrl,
+        licence_front: licenceFrontUrl,
+        licence_front_key: licenceBackKey,
+        id_card_front: idCardFrontUrl,
+        id_card_front_key: idCardFrontKey,
+        id_card_back: idCardBackUrl,
+        id_card_back_key: idCardBackKey,
+        car_front_image: carFrontUrl,
+        car_front_image_key: carFrontKey,
+        car_back_image: carBackUrl,
+        car_back_image_key: carBackKey,
         licence_number,
       });
       await chef.save();
@@ -175,7 +267,6 @@ const getDeliveryPartners = async (req: any, res: any, next: any) => {
   body = {
     ...body,
     ...req.query,
-    status: Not("Deleted"),
   };
 
   if (body.page || body.perPage) {
@@ -183,19 +274,31 @@ const getDeliveryPartners = async (req: any, res: any, next: any) => {
     delete body.perPage;
   }
   try {
-    const delivery = await DeliveryPartners.find({
-      where: body,
-      ...offset,
-      relations: ["user", "orders", "user.locations", "reviews"],
-      order: { created_at: "DESC" },
-    });
+    let query = AppDataSource.getRepository(DeliveryPartners)
+      .createQueryBuilder("delivery")
+      .leftJoinAndSelect("delivery.user", "user")
+      .leftJoinAndSelect("user.locations", "locations")
+      .leftJoinAndSelect("delivery.reviews", "reviews")
+      .leftJoinAndSelect("delivery.orders", "orders")
+      .where(body)
+      .andWhere({ status: Not("Deleted") })
+      .orderBy("delivery.created_at", "DESC");
+
+    if (offset) {
+      query.take(offset.take);
+      query.skip(offset.skip);
+    }
+
+    let result: any = await query.getManyAndCount();
+    let [delivery, count] = result;
+
     res.status(200).json({
       status: 0,
       data: delivery,
+      count,
     });
   } catch (error) {
     console.log(error);
-
     res.status(400).json({
       status: 1,
       message: error.message,
@@ -344,7 +447,6 @@ const updateDeliveryPartner = async (req: any, res: any, next: any) => {
     });
   }
 };
-
 
 export default {
   createDeliveryPartner,

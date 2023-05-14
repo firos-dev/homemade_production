@@ -14,9 +14,6 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from "typeorm";
-import { Roles } from "./Roles";
-import { Dietries } from "./Dietries";
-import { Locations } from "./Locations";
 import { Status } from "./../helpers/enums";
 import { Reviews } from "./Reviews";
 @Entity("delivery_partners")
@@ -56,7 +53,25 @@ export class DeliveryPartners extends BaseEntity {
     type: "text",
     nullable: true,
   })
-  licence_file: String;
+  licence_front: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  licence_front_key: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  licence_back: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  licence_back_key: String;
 
   @Column({
     type: "text",
@@ -73,7 +88,67 @@ export class DeliveryPartners extends BaseEntity {
     type: "text",
     nullable: true,
   })
+  id_card_front: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  id_card_front_key: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  id_card_back: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  id_card_back_key: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  car_front_image: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  car_front_image_key: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  car_back_image: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  car_back_image_key: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
   description: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  nationality: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  car_registration: String;
 
   @Column({
     type: "boolean",
@@ -99,10 +174,11 @@ export class DeliveryPartners extends BaseEntity {
     default: Status.INACTIVE,
   })
   status: Status;
-  
-  @OneToMany(() => Reviews,
-  (reviews) => reviews.delivery_partner, {cascade: true,})
-  reviews: Reviews[]
+
+  @OneToMany(() => Reviews, (reviews) => reviews.delivery_partner, {
+    cascade: true,
+  })
+  reviews: Reviews[];
 
   @CreateDateColumn()
   created_at: Date;

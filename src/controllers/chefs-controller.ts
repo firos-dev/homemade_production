@@ -210,7 +210,6 @@ const getChefs = async (req: any, res: any, next: any) => {
   body = {
     ...body,
     ...req.query,
-    status: Not("Deleted"),
   };
 
   if (body.page || body.perPage) {
@@ -231,7 +230,6 @@ const getChefs = async (req: any, res: any, next: any) => {
     "items.reviews",
     "orders",
   ];
-
   if (body.includeFollowing) {
     relations.push("user.following");
   }
@@ -247,21 +245,57 @@ const getChefs = async (req: any, res: any, next: any) => {
   }
 
   try {
-    let chefs = await Chefs.find({
-      relations: relations,
-      ...offset,
-      where: body,
-      order: { created_at: "DESC" },
-    });
+    let query = AppDataSource.getRepository(Chefs)
+      .createQueryBuilder("chefs")
+      .leftJoinAndSelect("chefs.user", "user")
+      .leftJoinAndSelect("chefs.cuisine", "cuisine")
+      .leftJoinAndSelect("chefs.spicy_level", "spicy_level")
+      .leftJoinAndSelect("chefs.dietry", "dietry")
+      .leftJoinAndSelect("user.locations", "locations")
+      .leftJoinAndSelect("chefs.drop_off_point", "drop_off_point")
+      .leftJoinAndSelect("chefs.availability", "availability")
+      .leftJoinAndSelect("chefs.reviews", "reviews", "reviews.status != :rs", {
+        rs: "Deleted",
+      })
+      .leftJoinAndSelect("chefs.items", "items", "items.status != :is", {
+        is: "Deleted",
+      })
+      .leftJoinAndSelect(
+        "items.reviews",
+        "itemsReviews",
+        "itemsReviews.status != :ir",
+        {
+          ir: "Deleted",
+        }
+      )
+      .leftJoinAndSelect(
+        "chefs.orders",
+        "orders",
+        "orders.order_status != :os",
+        {
+          os: "Deleted",
+        }
+      )
+      .where(body)
+      .andWhere({ status: Not("Deleted") })
+      .orderBy("chefs.created_at", "DESC");
+
+  if (offset) {
+      query.take(offset.take);
+      query.skip(offset.skip);
+    }
+
+    let result: any = await query.getManyAndCount();
+    let [chefs, count] = result;
 
     chefs = chefs.map((chef: any) => {
-      let completed = chef.orders.filter(
+      let completed = chef.orders?.filter(
         (order: any) => order.order_chef_status === OrderChefStatus.COMPLETED
       );
 
       let chefStars: any = [];
-      let items = chef.items.map((item: any) => {
-        let totalReviews = item.reviews.length;
+      let items = chef.items?.map((item: any) => {
+        let totalReviews = item.reviews?.length;
         let reviewSum = item.reviews.reduce(
           (a: any, b: any) => a + Number(b.star_count),
           0
@@ -274,7 +308,7 @@ const getChefs = async (req: any, res: any, next: any) => {
           item_reviews: totalReviews,
         };
       });
-      let reviewsCount = chef.items.length;
+      let reviewsCount = chef.items?.length;
 
       let chefStarSum = chefStars.reduce((a: any, b: any) => a + Number(b), 0);
       let chefStar = chefStarSum / reviewsCount;
@@ -283,12 +317,13 @@ const getChefs = async (req: any, res: any, next: any) => {
         chef_star: chefStar ? chefStar.toFixed(2) : "0",
         chef_reviews: reviewsCount,
         items,
-        deliveries: completed.length,
+        deliveries: completed?.length,
       };
     });
     res.status(200).json({
       status: 0,
       data: chefs,
+      count,
     });
   } catch (error) {
     console.log(error);
@@ -553,7 +588,5 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
     });
   }
 };
-
-
 
 export default { createChef, getChefs, updateChef, getChefBydateDistance };
