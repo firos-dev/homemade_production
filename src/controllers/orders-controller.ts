@@ -230,15 +230,13 @@ const updateOrder = async (req: any, res: any, next: any) => {
         "user",
         "chef",
         "chef.user",
+        "chef.drop_off_point",
         "delivery_partner",
         "delivery_partner.user",
         "express_order",
       ],
     });
-    const chef: any = await Chefs.findOne({
-      where: { id: order.chef_id },
-      relations: ["user", "drop_off_point"],
-    });
+    
     let body: any = req.body;
 
     // const deliveryLocation: any = await Locations.findOne({
@@ -318,6 +316,22 @@ const updateOrder = async (req: any, res: any, next: any) => {
       sendNotification({ user: order.user, title, body });
       sendNotification({ user: order.chef.user, title, body });
     }
+
+    // if(req.body.order_delivery_status === "Recieved"){
+    //   let latitude = order.chef.drop_off_point.latitude
+    //   let longitude = order.chef.drop_off_point.longitude
+    //   const deliveryIds = await AppDataSource.query(`SELECT o.id,
+    //   ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC)) ) 
+    //     * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+    //     * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) AS distance
+    //   FROM users 
+    //   JOIN chefs c ON c.id = o.chef_id
+    //   JOIN locations l ON c.drop_off_point_id = l.id
+    //   WHERE o.order_status != 'Deleted' AND o.order_status != 'Cancelled' AND o.order_status != 'Rejected' AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
+    //     * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+    //     * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) < 30
+    //   ORDER BY distance`);
+    // }
 
     res.status(200).json({
       status: 0,
@@ -501,7 +515,125 @@ const getLastReviewPending = async (req: any, res: any, next: any) => {
       .where({ reviewed: false, user_id })
       .andWhere("orders.order_status = :os", { os: "Completed" })
       .orderBy("orders.updated_at", "DESC")
+      .getOne();
+
+    res.status(200).json({
+      status: 0,
+      data: orders,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.message,
+    });
+  }
+};
+const deliveryPartnerAllocation = async (req: any, res: any, next: any) => {
+  const { id } = req.params;
+  const { delivery_partner_id } = req.query;
+
+  try {
+
+    if(!delivery_partner_id){
+      throw new Error("Invalid request")
+    }
+
+    await AppDataSource.getRepository(Orders)
+      .createQueryBuilder()
+      .update()
+      .set({ delivery_partner_id })
+      .where("delivery_partner_id IS NULL")
+      .andWhere({ id })
+      .execute();
+    res.status(200).json({
+      status: 0,
+      data: "Order accepted successfully",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.message,
+    });
+  }
+};
+
+
+const getDeliveryRecievedOrder = async (req: any, res: any, next: any) => {
+  const { latitude, longitude } = req.query;
+  const page = req.query.page || null;
+
+  const perPage = req.query.perPage || null;
+
+  const offset = {
+    skip: Number(page) * Number(perPage),
+    take: Number(perPage),
+  };
+
+  let body = req.query;
+
+  if (body.page || body.perPage) {
+    delete body.page;
+    delete body.perPage;
+  }
+
+  let days = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+
+  try {
+    if (!latitude || !longitude) {
+      throw new Error("Invalid request");
+    }
+
+    const orderIds = await AppDataSource.query(`SELECT o.id,
+      ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC)) ) 
+        * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+        * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) AS distance
+      FROM orders o
+      JOIN chefs c ON c.id = o.chef_id
+      JOIN locations l ON c.drop_off_point_id = l.id
+      WHERE o.order_status != 'Deleted' AND o.order_status != 'Cancelled' AND o.order_status != 'Rejected' AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
+        * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+        * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) < 30
+      ORDER BY distance
+      LIMIT ${offset.take} OFFSET ${offset.skip}`);
+
+    let ids = orderIds.map((r: any) => r.id);
+
+    if (ids.length < 1) {
+      res.status(200).json({
+        status: 0,
+        data: [],
+      });
+      return;
+    }
+    let orders: any = await AppDataSource.getRepository(Orders)
+      .createQueryBuilder("orders")
+      .leftJoinAndSelect("order.items", "items")
+      .leftJoinAndSelect("order.chef", "chef")
+      .leftJoinAndSelect("order.user", "user")
+      .leftJoinAndSelect("order.logs", "logs")
+      .leftJoinAndSelect("order.delivery_location", "delivery_location")
+      .where("orders.id IN (:...ids)", { ids })
       .getMany();
+
+    if (!orders.length) {
+      res.status(200).json({
+        status: 0,
+        data: [],
+      });
+      return;
+    }
 
     res.status(200).json({
       status: 0,
@@ -524,5 +656,7 @@ export default {
   getCurrentOrder,
   getDeliveriesCount,
   getLastReviewPending,
+  deliveryPartnerAllocation,
   getAllOrders,
+  getDeliveryRecievedOrder
 };

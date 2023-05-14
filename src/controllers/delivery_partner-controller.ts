@@ -6,8 +6,9 @@ import { Locations } from "../modules/Locations";
 import uploadFile from "../helpers/s3";
 import { promisify } from "util";
 import fs from "fs";
-import { Orders } from "../modules/Orders";
+import { AppDataSource } from "../";
 import { Not } from "typeorm";
+import { Orders } from "../modules/Orders";
 const unlinkAsync = promisify(fs.unlink);
 
 const createDeliveryPartner = async (req: any, res: any, next: any) => {
@@ -328,7 +329,6 @@ const updateDeliveryPartner = async (req: any, res: any, next: any) => {
   const { id } = req.params;
 
   try {
-
     await DeliveryPartners.update({ id: id }, { ...req.body });
 
     res.status(200).json({
@@ -344,6 +344,7 @@ const updateDeliveryPartner = async (req: any, res: any, next: any) => {
     });
   }
 };
+
 
 export default {
   createDeliveryPartner,
