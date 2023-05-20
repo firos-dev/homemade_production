@@ -30,7 +30,7 @@ var upload = multer({
   },
 }).single("image"); // Change `.fields` to `.single` and pass the field name "image" only
 
-router.post("/api/banners", auth, upload, bannersController.addBanners);
+router.post("/api/banner", auth, upload, bannersController.addBanners);
 router.get("/api/banners", bannersController.getBanners);
 router.delete("/api/banner/:id", auth, bannersController.deleteBanner);
 

@@ -36,14 +36,12 @@ export class Banners extends BaseEntity {
 
   @Column({
     type: "text",
-    array: true,
     nullable: true,
   })
   image: string;
 
   @Column({
     type: "text",
-    array: true,
     nullable: true,
   })
   image_key: string;

@@ -8,10 +8,11 @@ const unlinkAsync = promisify(fs.unlink);
 require("dotenv").config();
 
 const addBanners = async (req: any, res: any, next: any) => {
-  const { chef_id, name } = req.body;
+  const { chef_id, name, banner_type } = req.body;
 
   try {
     const imageFile = req.file;
+
     let image;
     let image_key;
     if (imageFile) {
@@ -29,6 +30,7 @@ const addBanners = async (req: any, res: any, next: any) => {
       chef_id,
       image,
       image_key,
+      banner_type,
     });
 
     await banner.save();
