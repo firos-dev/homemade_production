@@ -26,7 +26,6 @@ const createChef = async (req: any, res: any, next: any) => {
     spicy_level_id,
     description,
     terms_accepted,
-    drop_off_point_id,
     certificate_number,
     address_line_one,
     address_line_two,
@@ -45,6 +44,10 @@ const createChef = async (req: any, res: any, next: any) => {
     thursday,
     friday,
     saturday,
+    iban_number,
+    drop_off_point_id,
+    store_name_english,
+    store_name_arabic,
   } = req.body;
 
   let locationUpdate = [
@@ -63,7 +66,7 @@ const createChef = async (req: any, res: any, next: any) => {
 
   let imageKey, imageUrl;
   let certificateKey, certificateUrl;
-
+  let nationalKey, nationalId;
   try {
     const chefData = await Chefs.findOne({
       where: { user_id },
@@ -87,14 +90,16 @@ const createChef = async (req: any, res: any, next: any) => {
       });
       return;
     }
-    const { image, certificate_file } = req.files;
+    const { image, certificate_file, national_id } = req.files;
 
     let imageUploaded = image && image !== "undefined";
 
     let certificateUploaded =
       certificate_file && certificate_file !== "undefined";
 
-    if (imageUploaded || certificateUploaded) {
+    let nationalIdUpdloaded = national_id && national_id !== "undefined";
+
+    if (imageUploaded || certificateUploaded || nationalIdUpdloaded) {
       if (imageUploaded) {
         let imageResult = await uploadFile(
           image[0],
@@ -119,8 +124,29 @@ const createChef = async (req: any, res: any, next: any) => {
         }
         await unlinkAsync(certificate_file[0].path);
       }
+      if (nationalIdUpdloaded) {
+        let nationalIdResult = await uploadFile(
+          national_id[0],
+          `${user_id}/certificates/` + national_id[0].filename
+        );
+
+        if (nationalIdResult) {
+          nationalKey = nationalIdResult.Key;
+          nationalId = nationalIdResult.Location;
+        }
+        await unlinkAsync(national_id[0].path);
+      }
     }
     let locationValues = keys.filter((value) => locationUpdate.includes(value));
+
+    if (!locationValues.length) {
+      res.status(201).json({
+        status: 0,
+        message: "Please provide location details",
+      });
+
+      return;
+    }
 
     await Users.update(
       { id: user_id },
@@ -132,6 +158,22 @@ const createChef = async (req: any, res: any, next: any) => {
         user_type: UserType.CHEF,
       }
     );
+
+    const location = Locations.create({
+      user_id,
+      address_line_one,
+      address_line_two,
+      latitude,
+      longitude,
+      area,
+      state,
+      city,
+      zip_code,
+      country,
+      address_type: AddressType.SERVICE_ADDRES,
+    });
+
+    await location.save();
     let chef: any;
     chef = Chefs.create({
       user_id,
@@ -144,32 +186,20 @@ const createChef = async (req: any, res: any, next: any) => {
       description,
       terms_accepted,
       drop_off_point_id,
+      location_id: location.id,
       status,
       certificate_file: certificateUrl,
       certificate_key: certificateKey,
+      national_id: nationalId,
+      national_id_key: nationalKey,
+      iban_number,
+      store_name_english,
+      store_name_arabic,
       certificate_number,
       commission: commission?.value,
       commission_single_change: true,
     });
     await chef.save();
-
-    if (locationValues.length) {
-      const location = Locations.create({
-        user_id,
-        address_line_one,
-        address_line_two,
-        latitude,
-        longitude,
-        area,
-        state,
-        city,
-        zip_code,
-        country,
-        address_type: AddressType.SERVICE_ADDRES,
-      });
-
-      await location.save();
-    }
 
     const avail = Availabilities.create({
       chef_id: chef.id,
@@ -195,6 +225,190 @@ const createChef = async (req: any, res: any, next: any) => {
     });
   }
 };
+
+// const createChefUser = async (req: any, res: any, next: any) => {
+//   const {
+//     first_name,
+//     middle_name,
+//     last_name,
+//     full_name,
+//     mobile,
+//     email,
+//     bio,
+//     cuisine_id,
+//     dietry_id,
+//     spicy_level_id,
+//     description,
+//     terms_accepted,
+//     drop_off_point_id,
+//     certificate_number,
+//     address_line_one,
+//     address_line_two,
+//     latitude,
+//     longitude,
+//     area,
+//     state,
+//     status,
+//     city,
+//     zip_code,
+//     country,
+//     sunday,
+//     monday,
+//     tuesday,
+//     wednesday,
+//     thursday,
+//     friday,
+//     saturday,
+//   } = req.body;
+
+//   let locationUpdate = [
+//     "address_line_one",
+//     "address_line_two",
+//     "latitude",
+//     "longitude",
+//     "area",
+//     "state",
+//     "city",
+//     "zip_code",
+//     "country",
+//     "address_type",
+//   ];
+//   const keys = Object.keys(req.body);
+
+//   let imageKey, imageUrl;
+//   let certificateKey, certificateUrl;
+
+//   try {
+//     const chefData = await Chefs.findOne({
+//       where: { user_id },
+//     });
+
+//     const commission: any = await Settings.findOne({
+//       where: { name: "chef_commission" },
+//     });
+
+//     if (chefData) {
+//       await Users.update(
+//         { id: user_id },
+//         {
+//           user_type: UserType.CHEF,
+//         }
+//       );
+//       res.status(201).json({
+//         status: 0,
+//         message: "Chef is already exist",
+//         chefData,
+//       });
+//       return;
+//     }
+//     const { image, certificate_file } = req.files;
+
+//     let imageUploaded = image && image !== "undefined";
+
+//     let certificateUploaded =
+//       certificate_file && certificate_file !== "undefined";
+
+//     if (imageUploaded || certificateUploaded) {
+//       if (imageUploaded) {
+//         let imageResult = await uploadFile(
+//           image[0],
+//           `${user_id}/avatars/` + image[0].filename
+//         );
+
+//         if (imageResult) {
+//           imageKey = imageResult.Key;
+//           imageUrl = imageResult.Location;
+//         }
+//         await unlinkAsync(image[0].path);
+//       }
+//       if (certificateUploaded) {
+//         let certificateResult = await uploadFile(
+//           certificate_file[0],
+//           `${user_id}/certificates/` + certificate_file[0].filename
+//         );
+
+//         if (certificateResult) {
+//           certificateKey = certificateResult.Key;
+//           certificateUrl = certificateResult.Location;
+//         }
+//         await unlinkAsync(certificate_file[0].path);
+//       }
+//     }
+//     let locationValues = keys.filter((value) => locationUpdate.includes(value));
+
+//     await Users.update(
+//       { id: user_id },
+//       {
+//         first_name,
+//         middle_name,
+//         last_name,
+//         full_name,
+//         user_type: UserType.CHEF,
+//       }
+//     );
+//     let chef: any;
+//     chef = Chefs.create({
+//       user_id,
+//       bio,
+//       image: imageUrl,
+//       image_key: imageKey,
+//       cuisine_id,
+//       dietry_id,
+//       spicy_level_id,
+//       description,
+//       terms_accepted,
+//       drop_off_point_id,
+//       status,
+//       certificate_file: certificateUrl,
+//       certificate_key: certificateKey,
+//       certificate_number,
+//       commission: commission?.value,
+//       commission_single_change: true,
+//     });
+//     await chef.save();
+
+//     if (locationValues.length) {
+//       const location = Locations.create({
+//         user_id,
+//         address_line_one,
+//         address_line_two,
+//         latitude,
+//         longitude,
+//         area,
+//         state,
+//         city,
+//         zip_code,
+//         country,
+//         address_type: AddressType.SERVICE_ADDRES,
+//       });
+
+//       await location.save();
+//     }
+
+//     const avail = Availabilities.create({
+//       chef_id: chef.id,
+//       sunday,
+//       monday,
+//       tuesday,
+//       wednesday,
+//       thursday,
+//       friday,
+//       saturday,
+//     });
+//     await avail.save();
+//     res.status(201).json({
+//       status: 0,
+//       message: "Record has been successfully saved",
+//       chef,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(400).json({
+//       status: 0,
+//       message: error.message,
+//     });
+//   }
+// };
 
 const getChefs = async (req: any, res: any, next: any) => {
   const page = req.query.page || null;
@@ -280,7 +494,7 @@ const getChefs = async (req: any, res: any, next: any) => {
       .andWhere({ status: Not("Deleted") })
       .orderBy("chefs.created_at", "DESC");
 
-  if (offset) {
+    if (offset) {
       query.take(offset.take);
       query.skip(offset.skip);
     }
@@ -350,6 +564,9 @@ const updateChef = async (req: any, res: any, next: any) => {
     certificate_number,
     status,
     verified,
+    iban_number,
+    store_name_english,
+    store_name_arabic,
   } = req.body;
 
   let userUpdate = [
@@ -536,6 +753,31 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("chefs.cuisine", "cuisine")
       .leftJoinAndSelect("chefs.spicy_level", "spicy_level")
       .leftJoinAndSelect("chefs.dietry", "dietry")
+      .addSelect(["items.*"])
+      .addSelect(["reviews.*"])
+      .select([
+        "chefs.id",
+        "chefs.user_id",
+        "chefs.image",
+        "chefs.description",
+        "chefs.created_at",
+        "chefs.updated_at",
+        "chefs.bio",
+        "chefs.status",
+        "chefs.verified",
+        "chefs.iban_number",
+        "chefs.store_name_english",
+        "chefs.store_name_arabic",
+        "user.id",
+        "user.first_name",
+        "user.middle_name",
+        "user.last_name",
+        "user.full_name",
+        "user.user_name",
+        "user.email",
+        "user.mobile",
+        "user.firebase_token"
+      ])
       .where("chefs.id IN (:...ids)", { ids })
       .getMany();
 
@@ -543,7 +785,7 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       let chefStars: any = [];
       let items = chef.items.map((item: any) => {
         let totalReviews = item.reviews.length;
-        let reviewSum = item.reviews.reduce(
+        let reviewSum = item.reviews?.reduce(
           (a: any, b: any) => a + Number(b.star_count),
           0
         );

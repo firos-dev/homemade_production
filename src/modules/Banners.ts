@@ -1,4 +1,4 @@
-import { Status } from "../helpers/enums";
+import { BannerType, Status } from "../helpers/enums";
 import {
   BaseEntity,
   Entity,
@@ -39,14 +39,20 @@ export class Banners extends BaseEntity {
     array: true,
     nullable: true,
   })
-  images: string[];
+  image: string;
 
   @Column({
     type: "text",
     array: true,
     nullable: true,
   })
-  image_keys: string[];
+  image_key: string;
+
+  @Column({
+    type: "enum",
+    enum: BannerType,
+  })
+  banner_type: BannerType;
 
   @Column({
     type: "enum",

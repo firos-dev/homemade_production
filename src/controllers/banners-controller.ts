@@ -6,45 +6,29 @@ import { Not } from "typeorm";
 const unlinkAsync = promisify(fs.unlink);
 
 require("dotenv").config();
-const S3 = require("aws-sdk/clients/s3");
-
-const bucketName = process.env.AWS_BUCKET_NAME;
-const region = process.env.AWS_BUCKET_REGION;
-const accessKeyId = process.env.AWS_ACCESS_KEY;
-const secretAccessKey = process.env.AWS_SECRET_KEY;
-
-const s3 = new S3({
-  region,
-  accessKeyId,
-  secretAccessKey,
-});
 
 const addBanners = async (req: any, res: any, next: any) => {
   const { chef_id, name } = req.body;
 
   try {
-    const imageArr = req.files;
-    let images: any = [];
-    let image_keys: any = [];
-    if (imageArr.length > 0) {
-      await Promise.all(
-        imageArr.map(async (image: any) => {
-          let imageResult = await uploadFile(
-            image,
-            `banners/` + image.filename
-          );
-          images.push(imageResult.Location);
-          image_keys.push(imageResult.Key);
-          await unlinkAsync(image.path);
-        })
+    const imageFile = req.file;
+    let image;
+    let image_key;
+    if (imageFile) {
+      let imageResult = await uploadFile(
+        imageFile,
+        `banners/` + imageFile.filename
       );
+      await unlinkAsync(imageFile.path);
+      image = imageResult.Location;
+      image_key = imageResult.Key;
     }
 
     const banner = Banners.create({
       name,
       chef_id,
-      images,
-      image_keys,
+      image,
+      image_key,
     });
 
     await banner.save();
@@ -102,9 +86,9 @@ const deleteBanner = async (req: any, res: any, next: any) => {
   const { id } = req.params;
 
   try {
-    let banner = await Banners.findOne({where: {id}})
-    if(!banner){
-      throw new Error("Something went wrong. Please try again")
+    let banner = await Banners.findOne({ where: { id } });
+    if (!banner) {
+      throw new Error("Something went wrong. Please try again");
     }
 
     await Banners.delete({ id });

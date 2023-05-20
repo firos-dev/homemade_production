@@ -1,4 +1,9 @@
-import { generateOTP, getUsers, validateOtp, getLoginTime } from "./../controllers/user-controller";
+import {
+  generateOTP,
+  getUsers,
+  validateOtp,
+  getLoginTime,
+} from "./../controllers/user-controller";
 import express from "express";
 import { Users } from "../modules/User";
 const router = express.Router();
@@ -43,8 +48,11 @@ router.post("/api/register", async (req, res) => {
         data: {
           user_id: registeredUser.user.id,
           otp: registeredUser.otp,
-          name: registeredUser.user.name,
-          username: registeredUser.user.name,
+          first_name: registeredUser.user.first_name,
+          middle_name: registeredUser.user.middle_name,
+          last_name: registeredUser.user.last_name,
+          full_name: registeredUser.user.full_name,
+          username: registeredUser.username,
           mobile: registeredUser.user.mobile,
           email: registeredUser.user.email,
         },
@@ -208,6 +216,6 @@ router.post("/api/resend/otp", async (req, res) => {
 
 router.patch("/api/user/type/:id", auth, updateUserType);
 router.get("/api/users", auth, getUsers);
-router.get("/api/logintime",auth,getLoginTime)
+router.get("/api/logintime", auth, getLoginTime);
 
 export { router as userRouter };
