@@ -49,3 +49,7 @@ export enum UserType {
   DELIVERY_PARTNER = "Deliver Partner",
   SUPER_ADMIN = "Super Admin"
 }
+
+export enum BannerType {
+  HOME = "Home",
+}

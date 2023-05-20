@@ -62,6 +62,21 @@ export class Chefs extends BaseEntity {
   @Column({
     nullable: true,
   })
+  iban_number: string;
+
+  @Column({
+    nullable: true,
+  })
+  store_name_english: string;
+
+  @Column({
+    nullable: true,
+  })
+  store_name_arabic: string;
+
+  @Column({
+    nullable: true,
+  })
   cuisine_id: String;
 
   @ManyToOne(() => Dietries)
@@ -91,6 +106,17 @@ export class Chefs extends BaseEntity {
 
   @ManyToOne(() => Locations)
   @JoinColumn({
+    name: "location_id",
+  })
+  location: Locations;
+
+  @Column({
+    nullable: true,
+  })
+  location_id: String;
+
+  @ManyToOne(() => Locations)
+  @JoinColumn({
     name: "drop_off_point_id",
   })
   drop_off_point: Locations;
@@ -111,6 +137,18 @@ export class Chefs extends BaseEntity {
     nullable: true,
   })
   certificate_key: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  national_id: String;
+
+  @Column({
+    type: "text",
+    nullable: true,
+  })
+  national_id_key: String;
 
   @Column({
     nullable: true,
@@ -141,12 +179,12 @@ export class Chefs extends BaseEntity {
 
   @Column({
     nullable: true,
-    default: '10'
+    default: "10",
   })
   commission: String;
 
   @Column({
-    type: 'boolean',
+    type: "boolean",
     default: true,
   })
   commission_single_change: Boolean;

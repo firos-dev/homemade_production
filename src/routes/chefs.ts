@@ -44,11 +44,10 @@ var upload = multer({
 ]);
 
 router.post("/api/chef", auth, upload, chefsController.createChef);
-router.get("/api/chefs", auth, chefsController.getChefs);
+router.get("/api/chefs", chefsController.getChefs);
 router.patch("/api/chef/:id", auth, upload, chefsController.updateChef);
 router.get(
   "/api/chef/day/distance",
-  auth,
   upload,
   chefsController.getChefBydateDistance
 );
