@@ -115,17 +115,6 @@ export class Chefs extends BaseEntity {
   })
   location_id: String;
 
-  @ManyToOne(() => Locations)
-  @JoinColumn({
-    name: "drop_off_point_id",
-  })
-  drop_off_point: Locations;
-
-  @Column({
-    nullable: true,
-  })
-  drop_off_point_id: String;
-
   @Column({
     type: "text",
     nullable: true,

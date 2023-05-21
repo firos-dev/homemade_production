@@ -45,7 +45,6 @@ const createChef = async (req: any, res: any, next: any) => {
     friday,
     saturday,
     iban_number,
-    drop_off_point_id,
     store_name_english,
     store_name_arabic,
   } = req.body;
@@ -185,7 +184,6 @@ const createChef = async (req: any, res: any, next: any) => {
       spicy_level_id,
       description,
       terms_accepted,
-      drop_off_point_id,
       location_id: location.id,
       status,
       certificate_file: certificateUrl,
@@ -560,7 +558,7 @@ const updateChef = async (req: any, res: any, next: any) => {
     bio,
     email,
     mobile,
-    drop_off_point_id,
+    location_id,
     certificate_number,
     status,
     verified,
@@ -583,7 +581,7 @@ const updateChef = async (req: any, res: any, next: any) => {
     "bio",
     "image",
     "image_key",
-    "drop_off_point_id",
+    "location_id",
     "certificate_number",
     "certificate_file",
     "status",
@@ -658,7 +656,7 @@ const updateChef = async (req: any, res: any, next: any) => {
       let bdy: any = {
         bio,
         certificate_number,
-        drop_off_point_id,
+        location_id,
         status,
         verified,
       };
