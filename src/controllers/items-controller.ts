@@ -268,7 +268,7 @@ const getNearestItemsbyAvailability = async (req: any, res: any, next: any) => {
         * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) AS distance
       FROM items i
       JOIN chefs c ON i.chef_id = c.id
-      JOIN locations l ON c.drop_off_point_id = l.id
+      JOIN locations l ON c.location_id = l.id
       JOIN availabilities a ON a.chef_id = c.id
       WHERE a.${day} = true AND i.status != 'Deleted' AND c.status != 'Deleted' AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
         * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 

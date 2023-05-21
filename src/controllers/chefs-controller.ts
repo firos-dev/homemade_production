@@ -464,7 +464,7 @@ const getChefs = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("chefs.spicy_level", "spicy_level")
       .leftJoinAndSelect("chefs.dietry", "dietry")
       .leftJoinAndSelect("user.locations", "locations")
-      .leftJoinAndSelect("chefs.drop_off_point", "drop_off_point")
+      .leftJoinAndSelect("chefs.location", "location")
       .leftJoinAndSelect("chefs.availability", "availability")
       .leftJoinAndSelect("chefs.reviews", "reviews", "reviews.status != :rs", {
         rs: "Deleted",
@@ -723,7 +723,7 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
         * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
         * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) AS distance
       FROM chefs c
-      JOIN locations l ON c.drop_off_point_id = l.id
+      JOIN locations l ON c.location_id = l.id
       JOIN availabilities a ON a.chef_id = c.id
       INNER JOIN items ON items.chef_id = c.id
       WHERE a.${day} = true AND c.status != 'Deleted' AND c.status != 'Inactive' AND c.verified=true AND items.id IS NOT NULL AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
@@ -745,7 +745,7 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       .createQueryBuilder("chefs")
       .leftJoinAndSelect("chefs.user", "user")
       .leftJoinAndSelect("chefs.items", "items")
-      .leftJoinAndSelect("chefs.drop_off_point", "drop_off_point")
+      .leftJoinAndSelect("chefs.location", "location")
       .leftJoinAndSelect("items.reviews", "reviews")
       .leftJoinAndSelect("chefs.availability", "availability")
       .leftJoinAndSelect("chefs.cuisine", "cuisine")
