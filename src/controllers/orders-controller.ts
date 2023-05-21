@@ -36,15 +36,15 @@ const createOrder = async (req: any, res: any, next: any) => {
     }
     const chef: any = await Chefs.findOne({
       where: { id: chef_id },
-      relations: ["user", "drop_off_point"],
+      relations: ["user", "location"],
     });
     let distance: any;
-    if (chef && chef.drop_off_point) {
+    if (chef && chef.location) {
       const deliveryLocation: any = await Locations.findOne({
         where: { id: delivery_location_id },
       });
-      let lat1 = chef.drop_off_point.latitude;
-      let long1 = chef.drop_off_point.longitude;
+      let lat1 = chef.location.latitude;
+      let long1 = chef.location.longitude;
       let lat2 = deliveryLocation.latitude;
       let long2 = deliveryLocation.longitude;
       distance = await calculateDistance(lat1, long1, lat2, long2);
@@ -163,9 +163,9 @@ const getOrders = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("orders.delivery_partner", "delivery_partner")
       .leftJoinAndSelect("delivery_partner.user", "delivery_partner_user")
       .leftJoinAndSelect(
-        "chef.drop_off_point",
-        "drop_off_point",
-        "drop_off_point.status != :dos",
+        "chef.location",
+        "location",
+        "location.status != :dos",
         { dos: "Deleted" }
       )
       .leftJoinAndSelect("orders.logs", "logs")
@@ -230,7 +230,7 @@ const updateOrder = async (req: any, res: any, next: any) => {
         "user",
         "chef",
         "chef.user",
-        "chef.drop_off_point",
+        "chef.location",
         "delivery_partner",
         "delivery_partner.user",
         "express_order",
@@ -386,7 +386,7 @@ const getCurrentOrder = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("orders.chef", "chef")
       .leftJoinAndSelect("orders.logs", "logs")
       .leftJoinAndSelect("chef.user", "chefUser")
-      .leftJoinAndSelect("chef.drop_off_point", "drop_off_point")
+      .leftJoinAndSelect("chef.location", "location")
       .orderBy("logs.created_at", "ASC")
       .orderBy("orders.updated_at", "DESC")
       .where(whereClause);
@@ -452,7 +452,7 @@ const getAllOrders = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("orders.chef", "chef")
       .leftJoinAndSelect("orders.logs", "logs")
       .leftJoinAndSelect("chef.user", "chefUser")
-      .leftJoinAndSelect("chef.drop_off_point", "drop_off_point")
+      .leftJoinAndSelect("chef.location", "location")
       .orderBy("logs.created_at", "ASC")
       .orderBy("orders.updated_at", "DESC")
       .where(whereClause);
@@ -510,7 +510,7 @@ const getLastReviewPending = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("chef.user", "chef_user")
       .leftJoinAndSelect("orders.delivery_partner", "delivery_partner")
       .leftJoinAndSelect("delivery_partner.user", "delivery_partner_user")
-      .leftJoinAndSelect("chef.drop_off_point", "drop_off_point")
+      .leftJoinAndSelect("chef.location", "location")
       .leftJoinAndSelect("orders.logs", "logs")
       .where({ reviewed: false, user_id })
       .andWhere("orders.order_status = :os", { os: "Completed" })
@@ -601,7 +601,7 @@ const getDeliveryRecievedOrder = async (req: any, res: any, next: any) => {
         * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) AS distance
       FROM orders o
       JOIN chefs c ON c.id = o.chef_id
-      JOIN locations l ON c.drop_off_point_id = l.id
+      JOIN locations l ON c.location_id = l.id
       WHERE o.order_status != 'Deleted' AND o.order_status != 'Cancelled' AND o.order_status != 'Rejected' AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
         * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
         * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) < 30
