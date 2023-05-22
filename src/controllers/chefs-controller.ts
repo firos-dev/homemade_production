@@ -435,7 +435,7 @@ const getChefs = async (req: any, res: any, next: any) => {
     "spicy_level",
     "dietry",
     "user.locations",
-    "drop_off_point",
+    "location",
     "availability",
     "reviews",
     "items",

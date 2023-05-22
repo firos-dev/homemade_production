@@ -23,6 +23,9 @@ var storage = multer.diskStorage({
     } else if (file.fieldname === "certificate_file") {
       const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
       callback(null, uniqueSuffix + "." + ext);
+    } else if (file.fieldname === "national_id") {
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      callback(null, uniqueSuffix + "." + ext);
     }
   },
 });
@@ -39,6 +42,10 @@ var upload = multer({
   },
   {
     name: "certificate_file",
+    maxCount: 1,
+  },
+  {
+    name: "national_id",
     maxCount: 1,
   },
 ]);
