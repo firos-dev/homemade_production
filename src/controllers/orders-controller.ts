@@ -15,6 +15,8 @@ import { Activity, OrderLogs } from "../modules/OrderLogs";
 import { Locations } from "../modules/Locations";
 import calculateDistance from "../helpers/distance";
 import { Items } from "../modules/Items";
+import invoiceGenerator from "../helpers/invoice";
+import { Invoices } from "../modules/Invoices";
 
 const createOrder = async (req: any, res: any, next: any) => {
   const {
@@ -29,6 +31,7 @@ const createOrder = async (req: any, res: any, next: any) => {
     delivery_location_id,
     instructions,
     express_order,
+    delivery_charge_excluded = false,
   } = req.body;
   try {
     if (!user_id) {
@@ -64,7 +67,7 @@ const createOrder = async (req: any, res: any, next: any) => {
       express_order,
       distance,
     });
-
+    let itemRows: any;
     await order.save().then(async () => {
       const orderItems: any = await Promise.all(
         items.map(async (cart: any) => {
@@ -81,13 +84,42 @@ const createOrder = async (req: any, res: any, next: any) => {
           return i;
         })
       );
-      await AppDataSource.getRepository(OrderItems)
+      itemRows = await AppDataSource.getRepository(OrderItems)
         .createQueryBuilder()
         .insert()
         .into(OrderItems)
         .values(orderItems)
+        .returning("*")
         .execute();
     });
+
+    let {
+      itemTotal,
+      commission,
+      deliveryCharge,
+      discount,
+      offer,
+      taxes,
+      grandTotal,
+      deductions,
+    } = invoiceGenerator(order);
+
+    const invoice = await Invoices.create({
+      order_id: order.id,
+      // invoice_datetime: new Date(),
+      items: itemRows,
+      delivery_charge: deliveryCharge,
+      delivery_charge_excluded,
+      taxes,
+      deductions,
+      item_total: itemTotal,
+      discount_amount: discount,
+      offer_amount: offer,
+      commission,
+      grand_total: grandTotal,
+    });
+
+    await invoice.save();
 
     const log: any = OrderLogs.create({
       order_id: order.id,
@@ -161,6 +193,7 @@ const getOrders = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("orders.chef", "chef")
       .leftJoinAndSelect("chef.user", "chef_user")
       .leftJoinAndSelect("orders.delivery_partner", "delivery_partner")
+      .leftJoinAndSelect("orders.invoices", "invoices")
       .leftJoinAndSelect("delivery_partner.user", "delivery_partner_user")
       .leftJoinAndSelect(
         "chef.location",
@@ -236,7 +269,7 @@ const updateOrder = async (req: any, res: any, next: any) => {
         "express_order",
       ],
     });
-    
+
     let body: any = req.body;
 
     // const deliveryLocation: any = await Locations.findOne({
@@ -321,14 +354,14 @@ const updateOrder = async (req: any, res: any, next: any) => {
     //   let latitude = order.chef.drop_off_point.latitude
     //   let longitude = order.chef.drop_off_point.longitude
     //   const deliveryIds = await AppDataSource.query(`SELECT o.id,
-    //   ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC)) ) 
-    //     * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+    //   ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC)) )
+    //     * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) )
     //     * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) AS distance
-    //   FROM users 
+    //   FROM users
     //   JOIN chefs c ON c.id = o.chef_id
     //   JOIN locations l ON c.drop_off_point_id = l.id
-    //   WHERE o.order_status != 'Deleted' AND o.order_status != 'Cancelled' AND o.order_status != 'Rejected' AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
-    //     * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+    //   WHERE o.order_status != 'Deleted' AND o.order_status != 'Cancelled' AND o.order_status != 'Rejected' AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) )
+    //     * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) )
     //     * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) < 30
     //   ORDER BY distance`);
     // }
@@ -535,9 +568,8 @@ const deliveryPartnerAllocation = async (req: any, res: any, next: any) => {
   const { delivery_partner_id } = req.query;
 
   try {
-
-    if(!delivery_partner_id){
-      throw new Error("Invalid request")
+    if (!delivery_partner_id) {
+      throw new Error("Invalid request");
     }
 
     await AppDataSource.getRepository(Orders)
@@ -560,7 +592,6 @@ const deliveryPartnerAllocation = async (req: any, res: any, next: any) => {
     });
   }
 };
-
 
 const getDeliveryRecievedOrder = async (req: any, res: any, next: any) => {
   const { latitude, longitude } = req.query;
@@ -658,5 +689,5 @@ export default {
   getLastReviewPending,
   deliveryPartnerAllocation,
   getAllOrders,
-  getDeliveryRecievedOrder
+  getDeliveryRecievedOrder,
 };

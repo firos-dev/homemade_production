@@ -718,7 +718,7 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       throw new Error("Invalid request");
     }
 
-    const chefIds = await AppDataSource.query(`SELECT c.id,
+    const chefIds = await AppDataSource.query(`SELECT c.id,a.${day},
       ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC)) ) 
         * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
         * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) AS distance
@@ -726,9 +726,9 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       JOIN locations l ON c.location_id = l.id
       JOIN availabilities a ON a.chef_id = c.id
       INNER JOIN items ON items.chef_id = c.id
-      WHERE a.${day} = true AND c.status != 'Deleted' AND c.status != 'Inactive' AND c.verified=true AND items.id IS NOT NULL AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
-        * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
-        * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) < 50
+      WHERE c.status != 'Deleted' AND c.status != 'Inactive' AND c.verified=true AND items.id IS NOT NULL AND ( 6371 * acos( cos( radians(${latitude}) ) * cos( radians( CAST(l.latitude AS NUMERIC) ) ) 
+      * cos( radians( CAST(l.longitude AS NUMERIC) ) - radians(${longitude}) ) + sin( radians(${latitude}) ) 
+      * sin( radians( CAST(l.latitude AS NUMERIC) ) ) ) ) < 50
       ORDER BY distance
       LIMIT ${offset.take} OFFSET ${offset.skip}`);
 
@@ -774,7 +774,7 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
         "user.user_name",
         "user.email",
         "user.mobile",
-        "user.firebase_token"
+        "user.firebase_token",
       ])
       .where("chefs.id IN (:...ids)", { ids })
       .getMany();
