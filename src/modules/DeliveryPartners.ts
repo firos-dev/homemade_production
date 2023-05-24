@@ -151,6 +151,18 @@ export class DeliveryPartners extends BaseEntity {
   car_registration: String;
 
   @Column({
+    type: "text",
+    default: "10",
+  })
+  delivery_charge: String;
+  
+  @Column({
+    type: "boolean",
+    default: true,
+  })
+  charge_single_change: Boolean;
+
+  @Column({
     type: "boolean",
     default: false,
   })

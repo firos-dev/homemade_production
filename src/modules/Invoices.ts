@@ -24,7 +24,7 @@ export class Invoices extends BaseEntity {
   @OneToOne(() => Orders, (order) => order.invoice)
   @JoinColumn({ name: "order_id" })
   order: Orders;
-  
+
   @Column({
     name: "order_id",
   })
@@ -45,28 +45,43 @@ export class Invoices extends BaseEntity {
   delivery_charge: string;
 
   @Column({
+    type: "boolean",
+    default: false,
+  })
+  delivery_charge_excluded: Boolean;
+
+  @Column({
     nullable: true,
   })
   taxes: string;
+
+  @Column({
+    nullable: true,
+  })
+  deductions: string;
 
   @Column()
   item_total: string;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   discount_amount: string;
+    
+  @Column({
+    nullable: true,
+  })
+  offer_amount: string;
 
   @Column({
-    nullable: true
+    nullable: true,
   })
   commission: string;
 
   @Column({
-    type: "boolean",
-    default: false
+    nullable: true,
   })
-  delivery_charge_excluded: Boolean;
+  grand_total: string;
 
   @CreateDateColumn()
   created_at: Date;
