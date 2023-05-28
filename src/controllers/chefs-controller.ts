@@ -751,35 +751,46 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("chefs.cuisine", "cuisine")
       .leftJoinAndSelect("chefs.spicy_level", "spicy_level")
       .leftJoinAndSelect("chefs.dietry", "dietry")
-      .addSelect(["items.*"])
-      .addSelect(["reviews.*"])
-      .select([
-        "chefs.id",
-        "chefs.user_id",
-        "chefs.image",
-        "chefs.description",
-        "chefs.created_at",
-        "chefs.updated_at",
-        "chefs.bio",
-        "chefs.status",
-        "chefs.verified",
-        "chefs.iban_number",
-        "chefs.store_name_english",
-        "chefs.store_name_arabic",
-        "user.id",
-        "user.first_name",
-        "user.middle_name",
-        "user.last_name",
-        "user.full_name",
-        "user.user_name",
-        "user.email",
-        "user.mobile",
-        "user.firebase_token",
-      ])
+      // .addSelect(["items.*"])
+      // .addSelect(["reviews.*"])
+      // .select([
+      //   "chefs.id",
+      //   "chefs.user_id",
+      //   "chefs.image",
+      //   "chefs.description",
+      //   "chefs.created_at",
+      //   "chefs.updated_at",
+      //   "chefs.bio",
+      //   "chefs.status",
+      //   "chefs.verified",
+      //   "chefs.iban_number",
+      //   "chefs.store_name_english",
+      //   "chefs.store_name_arabic",
+      //   "user.id",
+      //   "user.first_name",
+      //   "user.middle_name",
+      //   "user.last_name",
+      //   "user.full_name",
+      //   "user.username",
+      //   "user.email",
+      //   "user.mobile",
+      //   "user.firebase_token",
+      // ])
       .where("chefs.id IN (:...ids)", { ids })
       .getMany();
 
-    chefs = chefs.map((chef: any) => {
+    if (!chefs.length) {
+      res.status(200).json({
+        status: 0,
+        data: [],
+      });
+      return;
+    }
+
+    console.log(chefs);
+    
+
+    chefs = chefs?.map((chef: any) => {
       let chefStars: any = [];
       let items = chef.items.map((item: any) => {
         let totalReviews = item.reviews.length;
@@ -806,14 +817,6 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
         items,
       };
     });
-
-    if (!chefs.length) {
-      res.status(200).json({
-        status: 0,
-        data: [],
-      });
-      return;
-    }
 
     res.status(200).json({
       status: 0,
