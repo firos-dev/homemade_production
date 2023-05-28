@@ -193,7 +193,7 @@ const getOrders = async (req: any, res: any, next: any) => {
       .leftJoinAndSelect("orders.chef", "chef")
       .leftJoinAndSelect("chef.user", "chef_user")
       .leftJoinAndSelect("orders.delivery_partner", "delivery_partner")
-      .leftJoinAndSelect("orders.invoices", "invoices")
+      .leftJoinAndSelect("orders.invoice", "invoice")
       .leftJoinAndSelect("delivery_partner.user", "delivery_partner_user")
       .leftJoinAndSelect(
         "chef.location",
