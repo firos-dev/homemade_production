@@ -38,7 +38,7 @@ import { OrderLogs } from "./modules/OrderLogs";
 import { orderLogsRouter } from "./routes/order_logs";
 import { Reviews } from "./modules/Reviews";
 import { reviewRouter } from "./routes/reviews";
-import { paymentRouter } from "./routes/payments";
+// import { paymentRouter } from "./routes/payments";
 import { Banners } from "./modules/Banners";
 import { bannersRouter } from "./routes/banners";
 import { IdMaster } from "./modules/IdMaster";
@@ -126,7 +126,7 @@ export const AppDataSource = new DataSource({
   app.use(followersRouter);
   app.use(orderLogsRouter);
   app.use(reviewRouter);
-  app.use(paymentRouter);
+  // app.use(paymentRouter);
   app.use(bannersRouter);
   app.use(idMasterRouter);
   app.use(commonRouter);
