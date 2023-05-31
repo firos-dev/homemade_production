@@ -75,8 +75,28 @@ const updateCard = async (req: any, res: any, next: any) => {
   }
 };
 
+const deleteCard = async (req: any, res: any, next: any) => {
+  const { id } = req.params;
+
+  try {
+    await CardDetails.delete({ id });
+    res.status(200).json({
+      status: 0,
+      message: "Record has been successfully deleted",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(400).json({
+      status: 1,
+      message: error.message,
+    });
+  }
+};
+
 export default {
   addCard,
   getCards,
   updateCard,
+  deleteCard
 };

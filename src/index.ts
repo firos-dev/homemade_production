@@ -47,6 +47,10 @@ import { Invoices } from "./modules/Invoices";
 import { commonRouter } from "./routes/common";
 import { Settings } from "./modules/Settings";
 import { settingsRouter } from "./routes/settings";
+import { bankRouter } from "./routes/bank_account";
+import { cardDetailsRouter } from "./routes/card_details";
+import { BankAccounts } from "./modules/BankAccount";
+import { CardDetails } from "./modules/CardDetails";
 
 require("dotenv").config();
 const app = express();
@@ -90,6 +94,8 @@ export const AppDataSource = new DataSource({
     IdMaster,
     Invoices,
     Settings,
+    BankAccounts,
+    CardDetails,
   ],
   synchronize: true,
 });
@@ -131,6 +137,8 @@ export const AppDataSource = new DataSource({
   app.use(idMasterRouter);
   app.use(commonRouter);
   app.use(settingsRouter);
+  app.use(bankRouter);
+  app.use(cardDetailsRouter);
   app.use((error: any, req: any, res: any, next: any) => {
     if (req.file) {
       fs.unlink(req.file.path, (err) => {
