@@ -219,6 +219,16 @@ const createDeliveryPartner = async (req: any, res: any, next: any) => {
       });
       await chef.save();
     }
+    if (
+      !latitude ||
+      latitude === "" ||
+      latitude === "null" ||
+      !longitude ||
+      longitude === "" ||
+      longitude === "null"
+    ) {
+      throw new Error("Invalid location");
+    }
     if (locationValues.length) {
       const location = Locations.create({
         user_id,

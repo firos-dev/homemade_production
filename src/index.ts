@@ -51,6 +51,8 @@ import { bankRouter } from "./routes/bank_account";
 import { cardDetailsRouter } from "./routes/card_details";
 import { BankAccounts } from "./modules/BankAccount";
 import { CardDetails } from "./modules/CardDetails";
+import { Payments } from "./modules/Payments";
+import { paymentRouter } from "./routes/payments";
 
 require("dotenv").config();
 const app = express();
@@ -96,6 +98,7 @@ export const AppDataSource = new DataSource({
     Settings,
     BankAccounts,
     CardDetails,
+    Payments
   ],
   synchronize: true,
 });
@@ -132,7 +135,7 @@ export const AppDataSource = new DataSource({
   app.use(followersRouter);
   app.use(orderLogsRouter);
   app.use(reviewRouter);
-  // app.use(paymentRouter);
+  app.use(paymentRouter);
   app.use(bannersRouter);
   app.use(idMasterRouter);
   app.use(commonRouter);

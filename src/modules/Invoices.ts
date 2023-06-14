@@ -15,6 +15,7 @@ import {
 } from "typeorm";
 import { Orders } from "./Orders";
 import { OrderItems } from "./OrderItems";
+import { Payments } from "./Payments";
 
 @Entity("invoices")
 export class Invoices extends BaseEntity {
@@ -32,6 +33,9 @@ export class Invoices extends BaseEntity {
 
   @OneToMany(() => OrderItems, (items) => items.invoice)
   items: OrderItems[];
+
+  @OneToMany(() => Payments, (pay) => pay.invoice)
+  payments: Payments[];
 
   @Column({
     type: "timestamp",
@@ -67,7 +71,7 @@ export class Invoices extends BaseEntity {
     nullable: true,
   })
   discount_amount: string;
-    
+
   @Column({
     nullable: true,
   })
@@ -77,6 +81,12 @@ export class Invoices extends BaseEntity {
     nullable: true,
   })
   commission: string;
+
+  @Column({
+    nullable: true,
+    default: "SAR",
+  })
+  currency: string;
 
   @Column({
     nullable: true,

@@ -86,7 +86,16 @@ const createCustomer = async (req: any, res: any, next: any) => {
       terms_accepted,
     });
     await customer.save();
-
+    if (
+      !latitude ||
+      latitude === "" ||
+      latitude === "null" ||
+      !longitude ||
+      longitude === "" ||
+      longitude === "null"
+    ) {
+      throw new Error("Invalid location");
+    }
     if (locationValues.length) {
       const location = Locations.create({
         user_id,
@@ -238,7 +247,7 @@ const updateCustomer = async (req: any, res: any, next: any) => {
     if (customerValues) {
       await Customers.update(
         { id },
-        { image: imageUrl, image_key: imageKey, terms_accepted, status}
+        { image: imageUrl, image_key: imageKey, terms_accepted, status }
       );
     }
 

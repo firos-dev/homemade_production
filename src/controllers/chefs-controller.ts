@@ -62,6 +62,9 @@ const createChef = async (req: any, res: any, next: any) => {
     "address_type",
   ];
   const keys = Object.keys(req.body);
+  if (!latitude || !longitude) {
+    throw new Error("Latitude or longitude is missing");
+  }
 
   let imageKey, imageUrl;
   let certificateKey, certificateUrl;
@@ -157,7 +160,16 @@ const createChef = async (req: any, res: any, next: any) => {
         user_type: UserType.CHEF,
       }
     );
-
+    if (
+      !latitude ||
+      latitude === "" ||
+      latitude === "null" ||
+      !longitude ||
+      longitude === "" ||
+      longitude === "null"
+    ) {
+      throw new Error("Invalid location");
+    }
     const location = Locations.create({
       user_id,
       address_line_one,
@@ -788,7 +800,6 @@ const getChefBydateDistance = async (req: any, res: any, next: any) => {
     }
 
     console.log(chefs);
-    
 
     chefs = chefs?.map((chef: any) => {
       let chefStars: any = [];
