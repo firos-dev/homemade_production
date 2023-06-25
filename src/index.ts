@@ -53,6 +53,8 @@ import { BankAccounts } from "./modules/BankAccount";
 import { CardDetails } from "./modules/CardDetails";
 import { Payments } from "./modules/Payments";
 import { paymentRouter } from "./routes/payments";
+import { walletRouter } from "./routes/wallet";
+import { Wallet } from "./modules/Wallet";
 
 require("dotenv").config();
 const app = express();
@@ -98,7 +100,8 @@ export const AppDataSource = new DataSource({
     Settings,
     BankAccounts,
     CardDetails,
-    Payments
+    Payments,
+    Wallet
   ],
   synchronize: true,
 });
@@ -142,6 +145,7 @@ export const AppDataSource = new DataSource({
   app.use(settingsRouter);
   app.use(bankRouter);
   app.use(cardDetailsRouter);
+  app.use(walletRouter)
   app.use((error: any, req: any, res: any, next: any) => {
     if (req.file) {
       fs.unlink(req.file.path, (err) => {
