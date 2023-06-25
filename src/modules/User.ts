@@ -22,6 +22,7 @@ import { Orders } from "./Orders";
 import { Cart } from "./Cart";
 import { UserType } from "../helpers/enums";
 import { Reviews } from "./Reviews";
+import { Wallet } from "./Wallet";
 @Entity("users")
 export class Users extends BaseEntity {
   @PrimaryGeneratedColumn("uuid")
@@ -77,6 +78,9 @@ export class Users extends BaseEntity {
 
   @OneToMany(() => Cart, (cart) => cart.user)
   cart_items: Cart[];
+
+  @OneToMany(() => Wallet, (wallet) => wallet.user)
+  wallet: Wallet[];
 
   @Column({
     nullable: true,
